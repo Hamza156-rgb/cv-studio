@@ -1,0 +1,37 @@
+import { describe, expect, it } from "vitest";
+import { newResumeData, normalizeResumeData, sampleResumeData } from "../shared/resume";
+import { decodeResumePhoto } from "./routers";
+
+describe("resume data model", () => {
+  it("creates a complete blank resume with an ordered set of sections", () => {
+    const resume = newResumeData("modern");
+    expect(resume.sectionOrder).toContain("experience");
+    expect(resume.hiddenSections).toEqual([]);
+    expect(resume.theme.accent).toBe("#24474A");
+  });
+
+  it("normalizes incomplete persisted data without dropping valid content", () => {
+    const normalized = normalizeResumeData({ fullName: "Casey", skills: [{ id: "1", name: "Writing", level: "Expert" }], theme: { accent: "#000000" } }, "minimal");
+    expect(normalized.fullName).toBe("Casey");
+    expect(normalized.skills).toHaveLength(1);
+    expect(normalized.theme.font).toBe("modern");
+    expect(normalized.sectionOrder).toContain("education");
+  });
+
+  it("provides sample content suitable for a preview", () => {
+    const sample = sampleResumeData();
+    expect(sample.experiences[0]?.highlights).toHaveLength(2);
+    expect(sample.summary.length).toBeGreaterThan(80);
+  });
+
+  it("accepts supported, non-empty image uploads and exposes safe storage metadata", () => {
+    const photo = decodeResumePhoto("data:image/png;base64,aGVsbG8=");
+    expect(photo.mimeType).toBe("image/png");
+    expect(photo.bytes.toString()).toBe("hello");
+  });
+
+  it("rejects unsupported or empty headshot data", () => {
+    expect(() => decodeResumePhoto("data:image/svg+xml;base64,PHN2Zy8+")).toThrow("Please upload a JPG, PNG, or WebP image.");
+    expect(() => decodeResumePhoto("data:image/jpeg;base64,")).toThrow("Please upload a JPG, PNG, or WebP image.");
+  });
+});
