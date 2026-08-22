@@ -24,3 +24,11 @@
 - [x] Add confirmed automated coverage for the Portrait template’s photo-ready rendering behavior.
 - [x] Test the user-facing credential authentication error message for a failed sign-in mutation.
 - [x] Add rendered-component tests for Portrait headshot placeholder and uploaded-photo display.
+- [x] Perform a senior QA sweep covering public navigation, credential signup/login/logout, dashboard access, new resume creation, editor changes, photo upload, autosave, PDF export, print, and mobile layouts.
+- [x] Fix every reproducible functional, accessibility, responsive, or release-readiness defect identified during the QA sweep.
+- [x] Re-run automated tests, type checking, production build, and critical-path visual verification after QA fixes.
+- [x] Remove the confirmed Express deprecation warning from credential logout cookie cleanup while preserving session invalidation behavior.
+- [x] Reject MIME-spoofed, truncated, or malformed headshot uploads by validating JPG, PNG, and WebP file signatures and basic payload completeness server-side.
+- [x] Prevent editor changes made during an in-flight autosave from being stranded without a follow-up save.
+- [x] Use a local-browser-compatible SameSite cookie policy for insecure development requests while retaining secure cross-site production sessions.
+- [x] Separate the dashboard sign-in and return-home actions so unauthenticated access gating remains clear and touch-friendly on all viewports.

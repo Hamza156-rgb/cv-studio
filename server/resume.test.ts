@@ -31,14 +31,15 @@ describe("resume data model", () => {
   });
 
   it("accepts supported, non-empty image uploads and exposes safe storage metadata", () => {
-    const photo = decodeResumePhoto("data:image/png;base64,aGVsbG8=");
+    const photo = decodeResumePhoto("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/3OvXJwAAAABJRU5ErkJggg==");
     expect(photo.mimeType).toBe("image/png");
-    expect(photo.bytes.toString()).toBe("hello");
+    expect(photo.bytes.subarray(0, 4).toString("hex")).toBe("89504e47");
   });
 
   it("rejects unsupported or empty headshot data", () => {
     expect(() => decodeResumePhoto("data:image/svg+xml;base64,PHN2Zy8+")).toThrow("Please upload a JPG, PNG, or WebP image.");
     expect(() => decodeResumePhoto("data:image/jpeg;base64,")).toThrow("Please upload a JPG, PNG, or WebP image.");
+    expect(() => decodeResumePhoto("data:image/png;base64,aGVsbG8=")).toThrow("The uploaded file does not match its declared image format.");
+    expect(() => decodeResumePhoto("data:image/png;base64,iVBORw0KGgo=")).toThrow("The uploaded file does not match its declared image format.");
   });
 });
-

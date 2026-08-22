@@ -23,6 +23,10 @@ export function decodeResumePhoto(dataUrl: string) {
   const [, mimeType, encoded] = match;
   const bytes = Buffer.from(encoded, "base64");
   if (!bytes.length || bytes.length > 2 * 1024 * 1024) throw new TRPCError({ code: "BAD_REQUEST", message: "Please choose an image smaller than 2 MB." });
+  const isPng = mimeType === "image/png" && bytes.length >= 33 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) && bytes.subarray(12, 16).toString("ascii") === "IHDR" && bytes.readUInt32BE(16) > 0 && bytes.readUInt32BE(20) > 0;
+  const isJpeg = mimeType === "image/jpeg" && bytes.length >= 4 && bytes.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])) && bytes.subarray(-2).equals(Buffer.from([0xff, 0xd9]));
+  const isWebp = mimeType === "image/webp" && bytes.length >= 20 && bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP" && bytes.readUInt32LE(4) + 8 === bytes.length;
+  if (!isPng && !isJpeg && !isWebp) throw new TRPCError({ code: "BAD_REQUEST", message: "The uploaded file does not match its declared image format." });
   return { mimeType, bytes };
 }
 
@@ -56,8 +60,8 @@ export const appRouter = router({
       return user;
     }),
     logout: publicProcedure.mutation(({ ctx }) => {
-      ctx.res.clearCookie(COOKIE_NAME, { ...getSessionCookieOptions(ctx.req), maxAge: -1 });
-      ctx.res.clearCookie(CREDENTIAL_SESSION_COOKIE, { ...getSessionCookieOptions(ctx.req), maxAge: -1 });
+      ctx.res.clearCookie(COOKIE_NAME, getSessionCookieOptions(ctx.req));
+      ctx.res.clearCookie(CREDENTIAL_SESSION_COOKIE, getSessionCookieOptions(ctx.req));
       return { success: true } as const;
     }),
   }),
