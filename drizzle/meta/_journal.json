@@ -15,6 +15,13 @@
       "when": 1787395694335,
       "tag": "0001_blue_groot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787400429402,
+      "tag": "0002_bizarre_leo",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, resumePhotos, resumes, type Resume, users } from "../drizzle/schema";
+import { credentialAccounts, InsertUser, resumePhotos, resumes, type Resume, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -47,6 +47,37 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
+export async function getUserById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return result[0];
+}
+
+export async function getCredentialUserByEmail(email: string) {
+  const db = await requireDb();
+  const result = await db.select({ user: users, credential: credentialAccounts }).from(credentialAccounts).innerJoin(users, eq(credentialAccounts.userId, users.id)).where(eq(credentialAccounts.email, email.toLowerCase())).limit(1);
+  return result[0];
+}
+
+export async function createCredentialUser(input: { openId: string; name: string; email: string; passwordHash: string }) {
+  const db = await requireDb();
+  const email = input.email.toLowerCase();
+  return db.transaction(async (tx) => {
+    const created: any = await tx.insert(users).values({ openId: input.openId, name: input.name, email, loginMethod: "credentials", role: "user", lastSignedIn: new Date() });
+    const userId = Number(created?.[0]?.insertId ?? created?.insertId);
+    if (!userId) throw new Error("Could not create the account.");
+    await tx.insert(credentialAccounts).values({ userId, email, passwordHash: input.passwordHash });
+    const result = await tx.select().from(users).where(eq(users.id, userId)).limit(1);
+    return result[0];
+  });
+}
+
+export async function touchCredentialUser(id: number) {
+  const db = await requireDb();
+  await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, id));
+}
+
 export async function listResumesForUser(userId: number) {
   const db = await requireDb();
   return db.select().from(resumes).where(eq(resumes.userId, userId)).orderBy(desc(resumes.updatedAt));
@@ -72,17 +103,14 @@ export async function updateResumeForUser(input: { userId: number; id: number; t
   if (input.title !== undefined) update.title = input.title;
   if (input.template !== undefined) update.template = input.template;
   if (input.data !== undefined) update.data = input.data;
-  if (Object.keys(update).length) {
-    await db.update(resumes).set(update).where(and(eq(resumes.id, input.id), eq(resumes.userId, input.userId)));
-  }
+  if (Object.keys(update).length) await db.update(resumes).set(update).where(and(eq(resumes.id, input.id), eq(resumes.userId, input.userId)));
   return getResumeForUser(input.userId, input.id);
 }
 
 export async function deleteResumeForUser(userId: number, id: number) {
   const db = await requireDb();
   const result: any = await db.delete(resumes).where(and(eq(resumes.id, id), eq(resumes.userId, userId)));
-  const affected = Number(result?.[0]?.affectedRows ?? result?.affectedRows ?? 0);
-  return affected > 0;
+  return Number(result?.[0]?.affectedRows ?? result?.affectedRows ?? 0) > 0;
 }
 
 export async function duplicateResumeForUser(userId: number, id: number) {

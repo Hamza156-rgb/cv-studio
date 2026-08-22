@@ -10,6 +10,10 @@ const db = vi.hoisted(() => ({
   listResumesForUser: vi.fn(),
   updateResumeForUser: vi.fn(),
   createResumePhoto: vi.fn(),
+  createCredentialUser: vi.fn(),
+  getCredentialUserByEmail: vi.fn(),
+  getUserById: vi.fn(),
+  touchCredentialUser: vi.fn(),
 }));
 
 vi.mock("./db", () => db);

@@ -32,7 +32,17 @@ export const resumePhotos = mysqlTable("resumePhotos", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => [index("resume_photos_user_created_idx").on(table.userId, table.createdAt)]);
 
+export const credentialAccounts = mysqlTable("credentialAccounts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 512 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Resume = typeof resumes.$inferSelect;
 export type ResumePhoto = typeof resumePhotos.$inferSelect;
+export type CredentialAccount = typeof credentialAccounts.$inferSelect;

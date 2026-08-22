@@ -16,3 +16,11 @@
 - [x] Extend hide and reorder controls to every supported resume section, including Summary, Experience, Education, and Skills.
 - [x] Provide a dedicated PDF export action with user-facing error handling in addition to the browser print flow.
 - [x] Add Vitest coverage for user-scoped resume-management contracts and not-found behavior.
+- [x] Replace the visible Manus account entry path with custom email-and-password signup, login, logout, and session flows.
+- [x] Build branded, accessible signup and login pages with clear password requirements and eye-icon show/hide password controls.
+- [x] Add photo-forward resume templates with a designed headshot placement and clear gallery indicators for photo support.
+- [x] Add security and UI tests for password-account validation, authentication failures, and photo-template rendering.
+- [x] Add automated UI coverage for the login and signup password visibility control and authentication error state.
+- [x] Add confirmed automated coverage for the Portrait template’s photo-ready rendering behavior.
+- [x] Test the user-facing credential authentication error message for a failed sign-in mutation.
+- [x] Add rendered-component tests for Portrait headshot placeholder and uploaded-photo display.

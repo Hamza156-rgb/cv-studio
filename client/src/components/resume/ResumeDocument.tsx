@@ -1,5 +1,6 @@
 import type { ResumeData, ResumeTemplateId } from "@shared/resume";
 import { AtSign, Globe2, Linkedin, MapPin, Phone } from "lucide-react";
+import React from "react";
 
 type Props = { data: ResumeData; template: ResumeTemplateId; className?: string };
 
@@ -11,7 +12,8 @@ function DateRange({ start, end, current }: { start: string; end: string; curren
 }
 
 export function ResumeDocument({ data, template, className = "" }: Props) {
-  const photoAllowed = template === "modern" || template === "executive" || template === "studio";
+  const photoAllowed = template === "modern" || template === "executive" || template === "studio" || template === "portrait";
+  const initials = data.fullName.split(/\s+/).filter(Boolean).map((part) => part[0]).slice(0, 2).join("").toUpperCase() || "CV";
   const visible = (key: keyof typeof sectionLabels) => !data.hiddenSections.includes(key);
   const hasContacts = Boolean(data.email || data.phone || data.location || data.website || data.linkedin || data.github);
   const summary = data.summary || "A concise professional profile will appear here as you build your resume.";
@@ -34,7 +36,7 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
             {data.linkedin && <span><Linkedin />{data.linkedin.replace(/^https?:\/\//, "")}</span>}
           </div>}
         </div>
-        {photoAllowed && data.photoUrl && <img className={`resume-photo photo-${data.theme.photoShape}`} src={data.photoUrl} alt={`${data.fullName || "Resume"} headshot`} />}
+        {photoAllowed && (data.photoUrl ? <img className={`resume-photo photo-${data.theme.photoShape}`} src={data.photoUrl} alt={`${data.fullName || "Resume"} headshot`} /> : template === "portrait" ? <div className="resume-photo resume-photo-placeholder" aria-label="Headshot placement">{initials}</div> : null)}
       </header>
 
       <div className="resume-body">

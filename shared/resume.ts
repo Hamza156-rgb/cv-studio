@@ -4,6 +4,7 @@ export const RESUME_TEMPLATES = [
   { id: "executive", name: "Executive", category: "Leadership", description: "A refined two-column layout for senior professionals.", ats: false, supportsPhoto: true },
   { id: "classic", name: "Classic", category: "Traditional", description: "Conservative typography and timeless document structure.", ats: true, supportsPhoto: false },
   { id: "studio", name: "Studio", category: "Creative", description: "An elegant sidebar layout with expressive visual rhythm.", ats: false, supportsPhoto: true },
+  { id: "portrait", name: "Portrait", category: "Photo-forward", description: "A warm, editorial profile layout designed around your professional headshot.", ats: false, supportsPhoto: true },
   { id: "focus", name: "Focus", category: "Developer", description: "A compact, one-page-forward style for technical roles.", ats: true, supportsPhoto: false },
 ] as const;
 

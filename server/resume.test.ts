@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { newResumeData, normalizeResumeData, sampleResumeData } from "../shared/resume";
+import { newResumeData, normalizeResumeData, RESUME_TEMPLATES, sampleResumeData } from "../shared/resume";
 import { decodeResumePhoto } from "./routers";
 
 describe("resume data model", () => {
@@ -24,6 +24,12 @@ describe("resume data model", () => {
     expect(sample.summary.length).toBeGreaterThan(80);
   });
 
+  it("includes Portrait as a deliberately photo-ready layout with a no-image placeholder fallback", () => {
+    const portrait = RESUME_TEMPLATES.find((template) => template.id === "portrait");
+    expect(portrait).toMatchObject({ name: "Portrait", category: "Photo-forward", supportsPhoto: true });
+    expect(sampleResumeData("portrait").photoUrl).toBe("");
+  });
+
   it("accepts supported, non-empty image uploads and exposes safe storage metadata", () => {
     const photo = decodeResumePhoto("data:image/png;base64,aGVsbG8=");
     expect(photo.mimeType).toBe("image/png");
@@ -35,3 +41,4 @@ describe("resume data model", () => {
     expect(() => decodeResumePhoto("data:image/jpeg;base64,")).toThrow("Please upload a JPG, PNG, or WebP image.");
   });
 });
+

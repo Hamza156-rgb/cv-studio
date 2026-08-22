@@ -8,6 +8,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
+import { authenticateCredentialAccount, CREDENTIAL_SESSION_COOKIE, CREDENTIAL_SESSION_MAX_AGE, issueCredentialSession, registerCredentialAccount } from "./credentialAuth";
 
 const templateIds = RESUME_TEMPLATES.map((template) => template.id) as [string, ...string[]];
 const resumeInput = z.object({
@@ -36,8 +37,27 @@ export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
+    signUp: publicProcedure.input(z.object({ name: z.string().trim().min(1).max(120), email: z.string().trim().email().max(320), password: z.string().min(8).max(128) })).mutation(async ({ ctx, input }) => {
+      try {
+        const user = await registerCredentialAccount(input);
+        const token = await issueCredentialSession(user.id);
+        ctx.res.cookie(CREDENTIAL_SESSION_COOKIE, token, { ...getSessionCookieOptions(ctx.req), maxAge: CREDENTIAL_SESSION_MAX_AGE * 1000 });
+        return user;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "We could not create your account.";
+        throw new TRPCError({ code: message.includes("already exists") ? "CONFLICT" : "BAD_REQUEST", message });
+      }
+    }),
+    signIn: publicProcedure.input(z.object({ email: z.string().trim().email().max(320), password: z.string().min(1).max(128) })).mutation(async ({ ctx, input }) => {
+      const user = await authenticateCredentialAccount(input);
+      if (!user) throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect email or password." });
+      const token = await issueCredentialSession(user.id);
+      ctx.res.cookie(CREDENTIAL_SESSION_COOKIE, token, { ...getSessionCookieOptions(ctx.req), maxAge: CREDENTIAL_SESSION_MAX_AGE * 1000 });
+      return user;
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       ctx.res.clearCookie(COOKIE_NAME, { ...getSessionCookieOptions(ctx.req), maxAge: -1 });
+      ctx.res.clearCookie(CREDENTIAL_SESSION_COOKIE, { ...getSessionCookieOptions(ctx.req), maxAge: -1 });
       return { success: true } as const;
     }),
   }),
