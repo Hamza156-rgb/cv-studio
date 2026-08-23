@@ -12,7 +12,7 @@ function DateRange({ start, end, current }: { start: string; end: string; curren
 }
 
 export function ResumeDocument({ data, template, className = "" }: Props) {
-  const photoAllowed = template === "modern" || template === "executive" || template === "studio" || template === "portrait";
+  const photoAllowed = template === "modern" || template === "executive" || template === "studio" || template === "portrait" || template === "horizon" || template === "boutique";
   const initials = data.fullName.split(/\s+/).filter(Boolean).map((part) => part[0]).slice(0, 2).join("").toUpperCase() || "CV";
   const visible = (key: keyof typeof sectionLabels) => !data.hiddenSections.includes(key);
   const hasContacts = Boolean(data.email || data.phone || data.location || data.website || data.linkedin || data.github);

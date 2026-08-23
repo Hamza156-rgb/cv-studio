@@ -32,3 +32,15 @@
 - [x] Prevent editor changes made during an in-flight autosave from being stranded without a follow-up save.
 - [x] Use a local-browser-compatible SameSite cookie policy for insecure development requests while retaining secure cross-site production sessions.
 - [x] Separate the dashboard sign-in and return-home actions so unauthenticated access gating remains clear and touch-friendly on all viewports.
+- [x] Add multiple new professional resume templates with distinct layout directions and suitable categories.
+- [x] Ensure every new template works in the live editor, gallery, real-time preview, photo controls, print view, and PDF download flow.
+- [x] Add automated template-catalog coverage and visually validate the expanded template gallery at desktop and mobile widths.
+- [x] Exercise each new template in the started editor workflow and confirm real-time rendering after a user begins a draft.
+- [x] Verify photo selection and removal in the new photo-capable templates and the intentional no-photo behavior of the ATS-oriented templates.
+- [x] Validate the print and PDF download actions with the expanded template library.
+- [x] Start a sample draft in Atlas, Horizon, Monograph, Ledger, and Boutique and confirm the live editor preview for each.
+- [x] Verify add/remove behavior in both new photo-capable templates and intentional photo omission in Atlas, Monograph, and Ledger.
+- [x] Exercise or directly verify print and PDF export behavior for every newly added template.
+- [x] Include client-side TypeScript test files in the standard Vitest discovery pattern so PDF template regression coverage runs in CI.
+- [x] Verify the print route and generic print layout for Atlas, Horizon, Monograph, Ledger, and Boutique individually.
+- [x] Open saved Atlas, Horizon, Monograph, Ledger, and Boutique drafts through their individual print routes and confirm each document renders.

@@ -6,6 +6,11 @@ export const RESUME_TEMPLATES = [
   { id: "studio", name: "Studio", category: "Creative", description: "An elegant sidebar layout with expressive visual rhythm.", ats: false, supportsPhoto: true },
   { id: "portrait", name: "Portrait", category: "Photo-forward", description: "A warm, editorial profile layout designed around your professional headshot.", ats: false, supportsPhoto: true },
   { id: "focus", name: "Focus", category: "Developer", description: "A compact, one-page-forward style for technical roles.", ats: true, supportsPhoto: false },
+  { id: "atlas", name: "Atlas", category: "Consulting", description: "A sharp, analytical layout that keeps high-impact experience easy to scan.", ats: true, supportsPhoto: false },
+  { id: "horizon", name: "Horizon", category: "Design", description: "A confident, photo-ready layout with an expressive but professional header.", ats: false, supportsPhoto: true },
+  { id: "monograph", name: "Monograph", category: "Academic", description: "A refined serif document for research, education, and considered career stories.", ats: true, supportsPhoto: false },
+  { id: "ledger", name: "Ledger", category: "Finance", description: "A disciplined, data-led format for finance, operations, and business roles.", ats: true, supportsPhoto: false },
+  { id: "boutique", name: "Boutique", category: "Creative", description: "A boutique studio-inspired profile with space for a memorable headshot.", ats: false, supportsPhoto: true },
 ] as const;
 
 export type ResumeTemplateId = (typeof RESUME_TEMPLATES)[number]["id"];

@@ -30,6 +30,13 @@ describe("resume data model", () => {
     expect(sampleResumeData("portrait").photoUrl).toBe("");
   });
 
+  it("ships an expanded catalog of distinct job-ready layouts", () => {
+    expect(RESUME_TEMPLATES).toHaveLength(12);
+    expect(RESUME_TEMPLATES.map((template) => template.id)).toEqual(expect.arrayContaining(["atlas", "horizon", "monograph", "ledger", "boutique"]));
+    expect(RESUME_TEMPLATES.find((template) => template.id === "horizon")).toMatchObject({ supportsPhoto: true, category: "Design" });
+    expect(RESUME_TEMPLATES.find((template) => template.id === "atlas")).toMatchObject({ ats: true, category: "Consulting" });
+  });
+
   it("accepts supported, non-empty image uploads and exposes safe storage metadata", () => {
     const photo = decodeResumePhoto("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/3OvXJwAAAABJRU5ErkJggg==");
     expect(photo.mimeType).toBe("image/png");

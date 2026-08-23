@@ -21,3 +21,23 @@ describe("Portrait resume template", () => {
   });
 });
 
+describe("expanded template rendering", () => {
+  afterEach(() => cleanup());
+
+  it("renders a selected headshot in the photo-ready Horizon layout", () => {
+    const data = { ...sampleResumeData("horizon"), photoUrl: "https://images.example.test/horizon.jpg" };
+    render(<ResumeDocument template="horizon" data={data} />);
+    const photo = screen.getByRole("img", { name: "Alex Morgan headshot" }) as HTMLImageElement;
+    expect(photo.src).toBe("https://images.example.test/horizon.jpg");
+  });
+
+  it("keeps every new ATS-oriented layout intentionally photo-free", () => {
+    (["atlas", "monograph", "ledger"] as const).forEach((template) => {
+      const data = { ...sampleResumeData(template), photoUrl: `https://images.example.test/${template}.jpg` };
+      const { container, unmount } = render(<ResumeDocument template={template} data={data} />);
+      expect(container.querySelector(`.resume-${template}`)).not.toBeNull();
+      expect(screen.queryByRole("img", { name: "Alex Morgan headshot" })).toBeNull();
+      unmount();
+    });
+  });
+});
