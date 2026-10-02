@@ -9,6 +9,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 import { authenticateCredentialAccount, CREDENTIAL_SESSION_COOKIE, CREDENTIAL_SESSION_MAX_AGE, issueCredentialSession, registerCredentialAccount } from "./credentialAuth";
+import { importResumeDocument, MAX_IMPORT_BYTES } from "./resumeImport";
 
 const templateIds = RESUME_TEMPLATES.map((template) => template.id) as [string, ...string[]];
 const resumeInput = z.object({
@@ -66,6 +67,7 @@ export const appRouter = router({
     }),
   }),
   resume: router({
+    import: protectedProcedure.input(z.object({ fileName: z.string().trim().min(1).max(255), dataUrl: z.string().max(Math.ceil(MAX_IMPORT_BYTES * 1.4)).min(32) })).mutation(async ({ input }) => importResumeDocument(input.dataUrl, input.fileName)),
     list: protectedProcedure.query(async ({ ctx }) => (await listResumesForUser(ctx.user.id)).map(toResumeDto)),
     get: protectedProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ ctx, input }) => {
       const resume = await getResumeForUser(ctx.user.id, input.id);

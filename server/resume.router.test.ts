@@ -16,7 +16,10 @@ const db = vi.hoisted(() => ({
   touchCredentialUser: vi.fn(),
 }));
 
+const resumeImport = vi.hoisted(() => ({ importResumeDocument: vi.fn() }));
+
 vi.mock("./db", () => db);
+vi.mock("./resumeImport", () => ({ importResumeDocument: resumeImport.importResumeDocument, MAX_IMPORT_BYTES: 8 * 1024 * 1024 }));
 
 import { appRouter } from "./routers";
 
@@ -66,5 +69,13 @@ describe("resume router contracts", () => {
     const caller = appRouter.createCaller(contextFor(42));
     await expect(caller.resume.get({ id: 999 })).rejects.toMatchObject({ code: "NOT_FOUND" });
     expect(db.getResumeForUser).toHaveBeenCalledWith(42, 999);
+  });
+
+  it("imports a resume only through an authenticated caller", async () => {
+    resumeImport.importResumeDocument.mockResolvedValue({ fileName: "resume.pdf", format: "pdf", data: { fullName: "Taylor Reed" }, textPreview: "Taylor Reed", warnings: [] });
+    const caller = appRouter.createCaller(contextFor(42));
+    const result = await caller.resume.import({ fileName: "resume.pdf", dataUrl: "data:application/pdf;base64,JVBERi0xLjQ=" });
+    expect(resumeImport.importResumeDocument).toHaveBeenCalledWith("data:application/pdf;base64,JVBERi0xLjQ=", "resume.pdf");
+    expect(result.data.fullName).toBe("Taylor Reed");
   });
 });
