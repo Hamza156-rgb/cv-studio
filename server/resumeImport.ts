@@ -28,8 +28,25 @@ export async function extractResumeText(bytes: Buffer, format: "pdf" | "docx") {
   }
   const parser = new PDFParse({ data: bytes });
   try {
-    const result = await parser.getText();
-    return result.text;
+    const result = await parser.getText({ pageJoiner: "\n", itemJoiner: " " });
+    const extracted = result.text.replace(/--\s*\d+\s+of\s+\d+\s*--/gi, "").trim();
+    if (extracted.replace(/\s/g, "").length >= 30) return extracted;
+
+    // A large number of resumes are scans or image-only exports. Render each
+    // page and OCR it instead of returning the PDF page counters as content.
+    const screenshots = await parser.getScreenshot({ desiredWidth: 1600, imageDataUrl: true, imageBuffer: false });
+    const { createWorker } = await import("tesseract.js");
+    const worker = await createWorker("eng");
+    try {
+      const pages: string[] = [];
+      for (const page of screenshots.pages) {
+        const pageText = await worker.recognize(page.dataUrl);
+        if (pageText.data.text.trim()) pages.push(pageText.data.text.trim());
+      }
+      return pages.join("\n\n").trim();
+    } finally {
+      await worker.terminate();
+    }
   } finally {
     await parser.destroy();
   }
@@ -53,7 +70,7 @@ function normalizedHeading(line: string) {
 }
 
 function linesOf(text: string) {
-  return text.replace(/\r/g, "").split("\n").map(cleanLine).filter(Boolean).slice(0, 1200);
+  return text.replace(/\r/g, "").split("\n").map(cleanLine).filter((line) => line && !/^--\s*\d+\s+of\s+\d+\s*--$/i.test(line)).slice(0, 1200);
 }
 
 function sectionMap(lines: string[]) {

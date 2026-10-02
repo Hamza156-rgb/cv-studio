@@ -125,3 +125,16 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 @media (max-width: 680px) { .import-review { align-items: flex-start; min-height: calc(100vh - 58px); padding: 24px 16px; }.import-review-card { padding: 28px 22px; }.import-review-card h1 { font-size: 37px; }.import-review-grid { gap: 22px; grid-template-columns: 1fr; }.import-review-actions { flex-direction: column-reverse; }.import-review-actions .button { width: 100%; }.import-choice-button { width: 100%; } }
 .dashboard-title-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 9px; justify-content: flex-end; }
 @media (max-width: 680px) { .dashboard-title-actions { justify-content: flex-start; width: 100%; } .dashboard-title-actions .button { flex: 1; } }
+.import-section-list { display: grid; gap: 6px; margin-top: 10px; }
+.import-section-list > div { align-items: center; background: #f6f4ee; border-radius: 5px; display: flex; justify-content: space-between; padding: 7px 9px; }
+.import-section-list > div span { color: #526660; font-family: "DM Sans", sans-serif; font-size: 11px; letter-spacing: 0; text-transform: none; }
+.import-section-list > div strong { color: #2d5b50; font-size: 11px; margin: 0; }
+.import-data-preview { background: #faf8f3; border: 1px solid #e8e2d8; max-height: 360px; overflow: auto; padding: 13px 15px; }
+.import-data-preview section + section { border-top: 1px solid #e8e2d8; margin-top: 14px; padding-top: 12px; }
+.import-data-preview h3 { color: #285249; font-size: 12px; letter-spacing: -.01em; margin: 0 0 5px; }
+.import-data-preview ul { color: #61716c; font-size: 11px; line-height: 1.6; margin: 0; padding-left: 15px; }
+.import-data-preview li { margin: 2px 0; overflow-wrap: anywhere; }
+.import-source-details { border-bottom: 1px solid #e5dfd5; color: #64736e; font-size: 11px; padding: 13px 0; }
+.import-source-details summary { cursor: pointer; font-weight: 600; }
+.import-source-details .import-text-preview { margin-bottom: 0; max-height: 100px; }
+@media (max-width: 680px) { .import-data-preview { max-height: 300px; } }

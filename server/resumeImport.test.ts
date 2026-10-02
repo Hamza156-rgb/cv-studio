@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { decodeResumeDocument, importResumeDocument, parseResumeText } from "./resumeImport";
+import { jsPDF } from "jspdf";
+import { decodeResumeDocument, extractResumeText, importResumeDocument, parseResumeText } from "./resumeImport";
 
 const pdfDataUrl = (content: string) => `data:application/pdf;base64,${Buffer.from(`%PDF-1.7\n${content}`).toString("base64")}`;
 const docxDataUrl = () => {
@@ -17,6 +18,14 @@ describe("resume import parsing", () => {
     const decoded = decodeResumeDocument(pdfDataUrl("text"), "Taylor-Reed.pdf");
     expect(decoded.format).toBe("pdf");
     expect(decoded.mimeType).toBe("application/pdf");
+  });
+
+  it("removes PDF page counters from selectable text", async () => {
+    const pdf = new jsPDF();
+    pdf.text("Hamza Waseem", 20, 20);
+    const text = await extractResumeText(Buffer.from(pdf.output("arraybuffer")), "pdf");
+    expect(text).toContain("Hamza Waseem");
+    expect(text).not.toMatch(/--\s*1\s+of\s+1\s*--/i);
   });
 
   it("maps common resume headings and contact details into editable fields", () => {
