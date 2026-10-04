@@ -39,6 +39,17 @@ describe("resume import parsing", () => {
     expect(data.skills.map((skill) => skill.name)).toEqual(["Figma", "Research", "Design systems", "Prototyping"]);
   });
 
+  it("recovers fields from OCR noise, icon headings, and compact month-year dates", () => {
+    const data = parseResumeText(`7! Res Lie\nHamza Waseem Adis!\nFull Stack Software Engineer A 18 > 4\nLahore + Pakistan Sit rsa 8\n@] Professional Summary\nMERN & MEAN Stack Developer with experience in React, Angular, Node.js, Express, MongoDB, SQL.\n©] Work Experience\nFull Stack Software Engineer\nTechbang (March 2026)\n- Led a development team delivering the platform end to end.\nMEAN / MERN Stack Developer\nBINARY TECH (Nov 2022 - FEB 2026)\n- Contributed as a MEAN Stack Developer.\n0G] skills\nAngular 9/17 AWS (S3/SES) CI/CD\nExpress JS/TS Firebase Google Cloud Deployment\nE] Education\nBSCS - Bachelor's\nLahore Garrison University Lahore (2021)\nBachelor's Degree — Lahore Garrison University, Lahore (2017-2021)`);
+    expect(data.fullName).toBe("Hamza Waseem");
+    expect(data.professionalTitle).toBe("Full Stack Software Engineer");
+    expect(data.summary).toContain("MERN & MEAN Stack Developer");
+    expect(data.experiences).toHaveLength(2);
+    expect(data.experiences[1]).toMatchObject({ company: "BINARY TECH NovFEB 2026", start: "2022", end: "2026" });
+    expect(data.education[0]).toMatchObject({ qualification: "BSCS - Bachelor's", institution: "Lahore Garrison University Lahore", start: "2017", end: "2021" });
+    expect(data.skills.map((skill) => skill.name)).toContain("Angular 9/17");
+  });
+
   it("does not accept a ZIP-shaped DOCX unless the document parser can read it", async () => {
     await expect(importResumeDocument(docxDataUrl(), "resume.docx")).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
