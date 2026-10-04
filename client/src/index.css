@@ -138,3 +138,9 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .import-source-details summary { cursor: pointer; font-weight: 600; }
 .import-source-details .import-text-preview { margin-bottom: 0; max-height: 100px; }
 @media (max-width: 680px) { .import-data-preview { max-height: 300px; } }
+.import-success-banner { align-items: center; background: #edf6f0; border-bottom: 1px solid #d4e6d8; color: #285249; display: flex; justify-content: space-between; padding: 10px 18px; }
+.import-success-banner > div { align-items: center; display: flex; font-size: 12px; gap: 8px; }
+.import-success-banner strong { color: #1e493f; }
+.import-success-banner button { align-items: center; background: transparent; border: 0; color: #5d7770; cursor: pointer; display: inline-flex; padding: 4px; }
+.import-success-banner button:hover { color: #1e493f; }
+@media (max-width: 680px) { .import-success-banner { padding: 9px 14px; } .import-success-banner > div { font-size: 11px; } }
