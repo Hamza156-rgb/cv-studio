@@ -201,3 +201,22 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .resume-entry .resume-rich-list li { margin: .7mm 0; }
 .resume-entry .resume-rich-paragraph + .resume-rich-paragraph { margin-top: 1.4mm; }
 @media (max-width: 800px) { .rich-text-toolbar span { display: none; } }
+
+/* Pro writing controls */
+.rich-text-field { border: 1px solid #d3dad5; border-radius: 8px; box-shadow: 0 3px 10px rgba(42,63,57,.04); overflow: hidden; }
+.rich-text-toolbar { align-items: center; background: linear-gradient(180deg, #fff, #f8faf7); border-bottom: 1px solid #e2e7e1; display: flex; gap: 5px; min-height: 43px; padding: 6px 8px; }
+.rich-text-toolbar-label { align-items: center; color: #59716a; display: inline-flex; font-size: 10px; font-weight: 700; gap: 5px; letter-spacing: .03em; text-transform: uppercase; }
+.rich-text-toolbar-label svg { color: #4d8978; }
+.rich-text-toolbar-divider { background: #dde4de; height: 22px; margin: 0 3px; width: 1px; }
+.rich-text-toolbar-group { align-items: center; background: #f1f5f1; border: 1px solid #e0e7e1; border-radius: 6px; display: inline-flex; gap: 2px; padding: 2px; }
+.rich-text-toolbar button { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 4px; color: #45635a; display: inline-flex; gap: 3px; height: 27px; justify-content: center; padding: 0 6px; }
+.rich-text-toolbar button:hover, .rich-text-toolbar button:focus-visible { background: #deeee6; border-color: #add0bd; color: #1e5045; }
+.rich-text-toolbar button span { font-size: 10px; font-weight: 700; }
+.rich-text-toolbar .rich-text-clear { padding: 0 7px; }
+.rich-text-toolbar-tip { color: #89958f; font-size: 9px; margin-left: auto; white-space: nowrap; }
+.rich-text-field textarea.editor-textarea { background: #fff; border: 0; border-radius: 0; min-height: 150px; outline: 0; padding: 14px; resize: vertical; }
+.rich-text-field textarea.editor-textarea:focus { box-shadow: inset 0 0 0 2px rgba(78,137,120,.16); }
+.rich-text-footer { align-items: center; background: #fbfcfa; border-top: 1px solid #edf0eb; color: #89958f; display: flex; font-size: 9px; gap: 14px; justify-content: space-between; padding: 7px 10px; }
+.rich-text-footer strong { color: #486d60; font-weight: 700; }
+.rich-text-footer kbd { background: #eef2ee; border: 1px solid #dce4dd; border-radius: 3px; color: #5c7269; font-size: 8px; padding: 1px 4px; }
+@media (max-width: 800px) { .rich-text-toolbar-tip, .rich-text-footer span:nth-child(2), .rich-text-footer span:nth-child(3) { display: none; } .rich-text-footer { justify-content: flex-end; } }
