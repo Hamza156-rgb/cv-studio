@@ -44,6 +44,15 @@ describe("expanded template rendering", () => {
     expect(screen.getAllByRole("list").length).toBeGreaterThanOrEqual(1);
   });
 
+  it("renders formatted summary and project descriptions", () => {
+    const base = sampleResumeData("modern");
+    const data = { ...base, summary: "**Product leader** with *clarity*.", projects: [{ ...base.projects[0], description: "- Built a polished experience" }] };
+    render(<ResumeDocument template="modern" data={data} />);
+    expect(screen.getByText("Product leader").tagName).toBe("STRONG");
+    expect(screen.getByText("clarity").tagName).toBe("EM");
+    expect(screen.getByText("Built a polished experience")).toBeTruthy();
+  });
+
   it("keeps every new ATS-oriented layout intentionally photo-free", () => {
     (["atlas", "monograph", "ledger"] as const).forEach((template) => {
       const data = { ...sampleResumeData(template), photoUrl: `https://images.example.test/${template}.jpg` };
