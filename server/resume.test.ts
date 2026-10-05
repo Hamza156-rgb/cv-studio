@@ -31,8 +31,8 @@ describe("resume data model", () => {
   });
 
   it("ships an expanded catalog of distinct job-ready layouts", () => {
-    expect(RESUME_TEMPLATES).toHaveLength(12);
-    expect(RESUME_TEMPLATES.map((template) => template.id)).toEqual(expect.arrayContaining(["atlas", "horizon", "monograph", "ledger", "boutique"]));
+    expect(RESUME_TEMPLATES).toHaveLength(13);
+    expect(RESUME_TEMPLATES.map((template) => template.id)).toEqual(expect.arrayContaining(["atlas", "horizon", "monograph", "ledger", "boutique", "editorial"]));
     expect(RESUME_TEMPLATES.find((template) => template.id === "horizon")).toMatchObject({ supportsPhoto: true, category: "Design" });
     expect(RESUME_TEMPLATES.find((template) => template.id === "atlas")).toMatchObject({ ats: true, category: "Consulting" });
   });

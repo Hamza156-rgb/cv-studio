@@ -11,6 +11,7 @@ export const RESUME_TEMPLATES = [
   { id: "monograph", name: "Monograph", category: "Academic", description: "A refined serif document for research, education, and considered career stories.", ats: true, supportsPhoto: false },
   { id: "ledger", name: "Ledger", category: "Finance", description: "A disciplined, data-led format for finance, operations, and business roles.", ats: true, supportsPhoto: false },
   { id: "boutique", name: "Boutique", category: "Creative", description: "A boutique studio-inspired profile with space for a memorable headshot.", ats: false, supportsPhoto: true },
+  { id: "editorial", name: "Editorial", category: "Photo-forward", description: "A premium modern layout with a bold masthead, headshot, and highly scannable project history.", ats: false, supportsPhoto: true },
 ] as const;
 
 export type ResumeTemplateId = (typeof RESUME_TEMPLATES)[number]["id"];

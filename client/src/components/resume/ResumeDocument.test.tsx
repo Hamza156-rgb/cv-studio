@@ -31,6 +31,11 @@ describe("expanded template rendering", () => {
     expect(photo.src).toBe("https://images.example.test/horizon.jpg");
   });
 
+  it("shows a premium headshot placement in the Editorial layout", () => {
+    render(<ResumeDocument template="editorial" data={sampleResumeData("editorial")} />);
+    expect(screen.getByLabelText("Headshot placement").textContent).toBe("AM");
+  });
+
   it("keeps every new ATS-oriented layout intentionally photo-free", () => {
     (["atlas", "monograph", "ledger"] as const).forEach((template) => {
       const data = { ...sampleResumeData(template), photoUrl: `https://images.example.test/${template}.jpg` };
