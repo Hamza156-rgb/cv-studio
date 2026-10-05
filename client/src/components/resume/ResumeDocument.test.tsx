@@ -53,6 +53,16 @@ describe("expanded template rendering", () => {
     expect(screen.getByText("Built a polished experience")).toBeTruthy();
   });
 
+  it("renders formatted education, awards, and volunteer descriptions", () => {
+    const base = sampleResumeData("modern");
+    const data = { ...base, education: [{ ...base.education[0], description: "**Research** and *systems*" }], awards: [{ id: "award-1", name: "Award", issuer: "Guild", date: "2025", description: "- Recognized for impact" }], volunteer: [{ id: "volunteer-1", organization: "Community", role: "Mentor", start: "2024", end: "", description: "**Guided** new designers" }] };
+    render(<ResumeDocument template="modern" data={data} />);
+    expect(screen.getByText("Research").tagName).toBe("STRONG");
+    expect(screen.getByText("systems").tagName).toBe("EM");
+    expect(screen.getByText("Recognized for impact")).toBeTruthy();
+    expect(screen.getByText("Guided").tagName).toBe("STRONG");
+  });
+
   it("keeps every new ATS-oriented layout intentionally photo-free", () => {
     (["atlas", "monograph", "ledger"] as const).forEach((template) => {
       const data = { ...sampleResumeData(template), photoUrl: `https://images.example.test/${template}.jpg` };
