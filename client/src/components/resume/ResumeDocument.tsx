@@ -43,7 +43,7 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
         {data.sectionOrder.map((section) => {
           if (!visible(section)) return null;
           if (section === "summary") return <ResumeSection key={section} title={sectionLabels[section]}><p className="resume-summary">{summary}</p></ResumeSection>;
-          if (section === "experience" && data.experiences.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.experiences.map((item) => <div className="resume-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.role || "Role title"}</h3><p>{item.company}{item.location ? ` · ${item.location}` : ""}</p></div><DateRange start={item.start} end={item.end} current={item.current} /></div>{item.description && <p>{item.description}</p>}{item.highlights.filter(Boolean).length > 0 && <ul>{item.highlights.filter(Boolean).map((line, index) => <li key={`${item.id}-${index}`}>{line}</li>)}</ul>}</div>)}</ResumeSection>;
+          if (section === "experience" && data.experiences.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.experiences.map((item) => <div className="resume-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.role || "Role title"}</h3><p>{item.company}{item.location ? ` · ${item.location}` : ""}</p></div><DateRange start={item.start} end={item.end} current={item.current} /></div>{item.description && <FormattedText text={item.description} />}{item.highlights.filter(Boolean).length > 0 && <ul>{item.highlights.filter(Boolean).map((line, index) => <li key={`${item.id}-${index}`}>{line}</li>)}</ul>}</div>)}</ResumeSection>;
           if (section === "education" && data.education.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.education.map((item) => <div className="resume-entry compact-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.qualification || "Qualification"}</h3><p>{item.institution}{item.location ? ` · ${item.location}` : ""}</p></div><DateRange start={item.start} end={item.end} /></div>{(item.grade || item.description) && <p>{item.grade}{item.grade && item.description ? " · " : ""}{item.description}</p>}</div>)}</ResumeSection>;
           if (section === "skills" && data.skills.length) return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-skills">{data.skills.map((skill) => <span key={skill.id}>{skill.name}</span>)}</div></ResumeSection>;
           if (section === "projects" && data.projects.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.projects.map((item) => <div className="resume-entry compact-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.name}</h3><p>{item.role}{item.technologies ? ` · ${item.technologies}` : ""}</p></div></div>{item.description && <p>{item.description}</p>}</div>)}</ResumeSection>;
@@ -61,6 +61,29 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
 
 function ResumeSection({ title, children }: { title: string; children: React.ReactNode }) {
   return <section className="resume-section"><h2>{title}</h2>{children}</section>;
+}
+
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_)/g).filter(Boolean).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) return <strong key={index}>{part.slice(2, -2)}</strong>;
+    if ((part.startsWith("*") && part.endsWith("*")) || (part.startsWith("_") && part.endsWith("_"))) return <em key={index}>{part.slice(1, -1)}</em>;
+    return <React.Fragment key={index}>{part}</React.Fragment>;
+  });
+}
+
+function FormattedText({ text }: { text: string }) {
+  const lines = text.split(/\r?\n/);
+  const content: React.ReactNode[] = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (/^\s*[-•]\s+/.test(line)) {
+      const items: string[] = [];
+      while (index < lines.length && /^\s*[-•]\s+/.test(lines[index])) { items.push(lines[index].replace(/^\s*[-•]\s+/, "")); index += 1; }
+      index -= 1;
+      content.push(<ul className="resume-rich-list" key={`list-${index}`}>{items.map((item, itemIndex) => <li key={itemIndex}>{renderInline(item)}</li>)}</ul>);
+    } else if (line.trim()) content.push(<p className="resume-rich-paragraph" key={`line-${index}`}>{renderInline(line)}</p>);
+  }
+  return <>{content}</>;
 }
 
 export function ResumeThumbnail({ data, template }: Omit<Props, "className">) {

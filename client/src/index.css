@@ -187,3 +187,17 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
   .preview-pane { overflow: visible; }
   .preview-canvas { background-image: radial-gradient(rgba(68,91,84,.1) .6px, transparent .6px); }
 }
+
+/* Experience rich-text editor */
+.rich-text-field { border: 1px solid #dcdcd5; background: #fff; }
+.rich-text-toolbar { align-items: center; background: #faf9f6; border-bottom: 1px solid #e8e5de; display: flex; gap: 3px; min-height: 36px; padding: 4px 6px; }
+.rich-text-toolbar button { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 4px; color: #49645e; display: inline-flex; height: 27px; justify-content: center; padding: 0; width: 29px; }
+.rich-text-toolbar button:hover, .rich-text-toolbar button:focus-visible { background: #e4eee9; border-color: #b8d0c5; color: #214e47; }
+.rich-text-toolbar span { color: #87918c; font-size: 9px; margin-left: 6px; }
+.rich-text-field textarea.editor-textarea { border: 0; border-radius: 0; min-height: 137px; outline: 0; }
+.rich-text-field textarea.editor-textarea:focus { box-shadow: inset 0 0 0 2px rgba(78,137,120,.16); }
+.resume-rich-paragraph { white-space: pre-wrap; }
+.resume-entry .resume-rich-list { margin: 1mm 0 1.4mm; padding-left: 4mm; }
+.resume-entry .resume-rich-list li { margin: .7mm 0; }
+.resume-entry .resume-rich-paragraph + .resume-rich-paragraph { margin-top: 1.4mm; }
+@media (max-width: 800px) { .rich-text-toolbar span { display: none; } }

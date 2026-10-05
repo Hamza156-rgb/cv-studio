@@ -36,6 +36,14 @@ describe("expanded template rendering", () => {
     expect(screen.getByLabelText("Headshot placement").textContent).toBe("AM");
   });
 
+  it("renders formatted experience descriptions as selectable rich text", () => {
+    const data = { ...sampleResumeData("modern"), experiences: [{ ...sampleResumeData("modern").experiences[0], description: "**Led** a team\n- Shipped *faster* releases" }] };
+    render(<ResumeDocument template="modern" data={data} />);
+    expect(screen.getByText("Led").tagName).toBe("STRONG");
+    expect(screen.getByText("faster").tagName).toBe("EM");
+    expect(screen.getAllByRole("list").length).toBeGreaterThanOrEqual(1);
+  });
+
   it("keeps every new ATS-oriented layout intentionally photo-free", () => {
     (["atlas", "monograph", "ledger"] as const).forEach((template) => {
       const data = { ...sampleResumeData(template), photoUrl: `https://images.example.test/${template}.jpg` };
