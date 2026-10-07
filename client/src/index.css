@@ -250,3 +250,4 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .revision-empty strong { color: #49645e; font-size: 13px; }
 .revision-empty span { font-size: 11px; }
 @media (max-width: 800px) { .revision-panel { right: 10px; top: 62px; width: calc(100vw - 20px); } .revision-save-row { align-items: stretch; flex-direction: column; } .revision-save-row button { justify-content: center; } .revision-item { align-items: flex-start; flex-direction: column; } .revision-item-actions { width: 100%; } .revision-item-actions button:first-child { flex: 1; } }
+.revision-item em { color: #7a9a8b; font-size: 9px; font-style: normal; letter-spacing: .02em; }
