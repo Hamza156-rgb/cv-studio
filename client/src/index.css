@@ -291,3 +291,14 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .resume-ats .resume-project-entry { border-top: 0; padding-top: 0; }
 .resume-ats .resume-project-link svg { display: none; }
 @media (max-width: 680px) { .collection-tools { align-items: flex-start; flex-direction: column; gap: 8px; } .resume-project-links { justify-content: flex-start; margin-top: 2mm; } }
+
+/* Experience drag-and-drop ordering */
+.entry-card { transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.entry-card-drag-over { border-color: #76a493; box-shadow: 0 0 0 2px rgba(118,164,147,.18); transform: translateY(2px); }
+.entry-card-drag-over > header { background: #edf6f0; }
+.entry-drag-handle { align-items: center; background: transparent; border: 0; color: #8a9b95; cursor: grab; display: inline-flex; padding: 7px 2px 7px 0; }
+.entry-drag-handle:hover { color: #2d6658; }
+.entry-drag-handle:active { cursor: grabbing; }
+.entry-card > header { gap: 5px; }
+.entry-card > header .entry-toggle { flex: 1; }
+@media (prefers-reduced-motion: reduce) { .entry-card { transition: none; } }
