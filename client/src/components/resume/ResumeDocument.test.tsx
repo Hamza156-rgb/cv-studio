@@ -78,6 +78,10 @@ describe("expanded template rendering", () => {
     expect(headings).toEqual(["Newer role", "Older role"]);
     expect(container.querySelector(".resume-ats")).not.toBeNull();
     expect(container.querySelector(".resume-ats .resume-photo")).toBeNull();
+    cleanup();
+    const manualData = { ...data, theme: { ...data.theme, experienceOrderMode: "manual" as const }, experiences: [data.experiences[0], data.experiences[1]] };
+    const manualView = render(<ResumeDocument template="modern" data={manualData} />);
+    expect(Array.from(manualView.container.querySelectorAll(".resume-experience-entry h3")).map((heading) => heading.textContent)).toEqual(["Older role", "Newer role"]);
   });
 
   it("renders formatted education, awards, and volunteer descriptions", () => {

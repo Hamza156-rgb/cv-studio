@@ -302,3 +302,11 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .entry-card > header { gap: 5px; }
 .entry-card > header .entry-toggle { flex: 1; }
 @media (prefers-reduced-motion: reduce) { .entry-card { transition: none; } }
+
+.collection-tools span { align-items: center; display: inline-flex; gap: 6px; }
+.collection-tools span::before { background: #7ca792; border-radius: 50%; content: ""; display: inline-block; height: 6px; width: 6px; }
+.entry-drag-handle { touch-action: none; user-select: none; }
+.entry-move-actions { align-items: center; display: inline-flex; gap: 3px; }
+.entry-move-actions button { align-items: center; background: #fff; border: 1px solid #dcded7; border-radius: 4px; color: #5c716b; cursor: pointer; display: inline-flex; font-size: 14px; height: 24px; justify-content: center; line-height: 1; padding: 0; width: 24px; }
+.entry-move-actions button:hover, .entry-move-actions button:focus-visible { background: #e8f1eb; border-color: #8bb3a1; color: #245a4d; }
+@media (max-width: 680px) { .entry-drag-handle { min-height: 36px; min-width: 34px; } .entry-move-actions button { height: 32px; width: 32px; } }

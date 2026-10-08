@@ -24,6 +24,7 @@ export type ResumeTheme = {
   scale: "compact" | "comfortable" | "airy";
   photoShape: "circle" | "rounded" | "square";
   atsMode: boolean;
+  experienceOrderMode: "auto" | "manual";
 };
 
 export type Experience = { id: string; role: string; company: string; location: string; start: string; end: string; current: boolean; description: string; highlights: string[] };
@@ -60,7 +61,7 @@ export type ResumeData = {
   theme: ResumeTheme;
 };
 
-const defaultTheme: ResumeTheme = { accent: "#24474A", text: "#1C2526", font: "modern", scale: "comfortable", photoShape: "circle", atsMode: false };
+const defaultTheme: ResumeTheme = { accent: "#24474A", text: "#1C2526", font: "modern", scale: "comfortable", photoShape: "circle", atsMode: false, experienceOrderMode: "auto" };
 const makeFallbackId = () => `resume-item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 export const newResumeData = (template: ResumeTemplateId = "modern"): ResumeData => ({

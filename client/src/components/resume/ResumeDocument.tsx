@@ -19,7 +19,7 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
   const summary = data.summary || "A concise professional profile will appear here as you build your resume.";
   const experienceHasContent = (item: ResumeData["experiences"][number]) => Boolean(item.role || item.company || item.location || item.start || item.end || item.current || item.description || item.highlights.some(Boolean));
   const projectHasContent = (item: ResumeData["projects"][number]) => Boolean(item.name || item.role || item.liveDemoUrl || item.githubUrl || item.caseStudyUrl || item.url || item.description || item.technologies);
-  const sortedExperiences = [...data.experiences].sort(compareExperiences);
+  const sortedExperiences = data.theme.experienceOrderMode === "manual" ? data.experiences : [...data.experiences].sort(compareExperiences);
 
   return (
     <article
