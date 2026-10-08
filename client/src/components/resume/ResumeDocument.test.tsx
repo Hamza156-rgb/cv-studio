@@ -46,11 +46,23 @@ describe("expanded template rendering", () => {
 
   it("renders formatted summary and project descriptions", () => {
     const base = sampleResumeData("modern");
-    const data = { ...base, summary: "**Product leader** with *clarity*.", projects: [{ ...base.projects[0], description: "- Built a polished experience" }] };
+    const data = { ...base, summary: "**Product leader** with *clarity*.", projects: [{ ...base.projects[0], url: "portfolio.example.com/case-study", description: "- Built a polished experience" }] };
     render(<ResumeDocument template="modern" data={data} />);
     expect(screen.getByText("Product leader").tagName).toBe("STRONG");
     expect(screen.getByText("clarity").tagName).toBe("EM");
     expect(screen.getByText("Built a polished experience")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /portfolio\.example\.com\/case-study/ }).getAttribute("href")).toBe("https://portfolio.example.com/case-study");
+  });
+
+  it("shows experience as role, company, location, dates, and work without empty placeholders", () => {
+    const base = sampleResumeData("modern");
+    const data = { ...base, experiences: [{ ...base.experiences[0], role: "", company: "Northstar Systems", location: "Remote", start: "2022", end: "2024", current: false, description: "Led the platform." }] };
+    render(<ResumeDocument template="modern" data={data} />);
+    expect(screen.getByText("Northstar Systems")).toBeTruthy();
+    expect(screen.getByText("Remote")).toBeTruthy();
+    expect(screen.getByText("2022 — 2024")).toBeTruthy();
+    expect(screen.getByText("Led the platform.")).toBeTruthy();
+    expect(screen.queryByText("Role title")).toBeNull();
   });
 
   it("renders formatted education, awards, and volunteer descriptions", () => {

@@ -251,3 +251,22 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .revision-empty span { font-size: 11px; }
 @media (max-width: 800px) { .revision-panel { right: 10px; top: 62px; width: calc(100vw - 20px); } .revision-save-row { align-items: stretch; flex-direction: column; } .revision-save-row button { justify-content: center; } .revision-item { align-items: flex-start; flex-direction: column; } .revision-item-actions { width: 100%; } .revision-item-actions button:first-child { flex: 1; } }
 .revision-item em { color: #7a9a8b; font-size: 9px; font-style: normal; letter-spacing: .02em; }
+
+/* Modern work-history hierarchy: role, employer, dates, then outcomes. */
+.resume-experience-entry { border-left: 1.2mm solid color-mix(in srgb, var(--resume-accent) 28%, transparent); padding-left: 4mm; }
+.resume-entry-main { min-width: 0; }
+.resume-company-line { align-items: baseline; color: var(--resume-accent); display: flex; flex-wrap: wrap; gap: 0; margin: .8mm 0 0 !important; }
+.resume-company-line strong { color: var(--resume-accent); font-size: 9.1pt; font-weight: 700; }
+.resume-company-line span { color: #667570; font-size: 8.5pt; }
+.resume-meta-separator { color: #a4afa9 !important; padding: 0 1mm; }
+.resume-experience-entry .resume-entry-heading { align-items: flex-start; }
+.resume-experience-entry .resume-date { background: color-mix(in srgb, var(--resume-accent) 8%, white); border-radius: 1.5mm; color: var(--resume-accent); font-size: 7.7pt; padding: 1.1mm 1.8mm; }
+.resume-work-content { margin-top: 2.2mm; }
+.resume-achievements { margin-top: 1.8mm !important; }
+.resume-achievements li { padding-left: .4mm; }
+.resume-project-entry { border-top: .35mm solid color-mix(in srgb, var(--resume-accent) 18%, transparent); padding-top: 2.7mm; }
+.resume-project-meta { color: #667570 !important; font-size: 8.2pt !important; margin-top: .8mm !important; }
+.resume-project-link { align-items: center; color: var(--resume-accent); display: inline-flex; flex: 0 1 auto; font-family: "DM Sans", sans-serif; font-size: 7.5pt; gap: 1mm; max-width: 47%; overflow: hidden; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.resume-project-link:hover { text-decoration: underline; }
+.resume-project-link svg { flex: 0 0 auto; height: 2.7mm; width: 2.7mm; }
+@media print { .resume-project-link { color: inherit; text-decoration: underline; } }

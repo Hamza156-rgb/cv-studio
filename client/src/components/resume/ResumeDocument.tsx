@@ -1,5 +1,5 @@
 import type { ResumeData, ResumeTemplateId } from "@shared/resume";
-import { AtSign, Globe2, Linkedin, MapPin, Phone } from "lucide-react";
+import { AtSign, ExternalLink, Globe2, Linkedin, MapPin, Phone } from "lucide-react";
 import React from "react";
 
 type Props = { data: ResumeData; template: ResumeTemplateId; className?: string };
@@ -17,6 +17,8 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
   const visible = (key: keyof typeof sectionLabels) => !data.hiddenSections.includes(key);
   const hasContacts = Boolean(data.email || data.phone || data.location || data.website || data.linkedin || data.github);
   const summary = data.summary || "A concise professional profile will appear here as you build your resume.";
+  const experienceHasContent = (item: ResumeData["experiences"][number]) => Boolean(item.role || item.company || item.location || item.start || item.end || item.current || item.description || item.highlights.some(Boolean));
+  const projectHasContent = (item: ResumeData["projects"][number]) => Boolean(item.name || item.role || item.url || item.description || item.technologies);
 
   return (
     <article
@@ -43,10 +45,10 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
         {data.sectionOrder.map((section) => {
           if (!visible(section)) return null;
           if (section === "summary") return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-summary"><FormattedText text={summary} /></div></ResumeSection>;
-          if (section === "experience" && data.experiences.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.experiences.map((item) => <div className="resume-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.role || "Role title"}</h3><p>{item.company}{item.location ? ` · ${item.location}` : ""}</p></div><DateRange start={item.start} end={item.end} current={item.current} /></div>{item.description && <FormattedText text={item.description} />}{item.highlights.filter(Boolean).length > 0 && <ul>{item.highlights.filter(Boolean).map((line, index) => <li key={`${item.id}-${index}`}>{line}</li>)}</ul>}</div>)}</ResumeSection>;
+          if (section === "experience" && data.experiences.some(experienceHasContent)) return <ResumeSection key={section} title={sectionLabels[section]}>{data.experiences.filter(experienceHasContent).map((item) => <div className="resume-entry resume-experience-entry" key={item.id}><div className="resume-entry-heading"><div className="resume-entry-main">{item.role && <h3>{item.role}</h3>}{(item.company || item.location) && <p className="resume-company-line">{item.company && <strong>{item.company}</strong>}{item.company && item.location && <span className="resume-meta-separator"> · </span>}{item.location && <span>{item.location}</span>}</p>}</div><DateRange start={item.start} end={item.end} current={item.current} /></div>{item.description && <div className="resume-work-content"><FormattedText text={item.description} /></div>}{item.highlights.filter(Boolean).length > 0 && <ul className="resume-achievements">{item.highlights.filter(Boolean).map((line, index) => <li key={`${item.id}-${index}`}>{line}</li>)}</ul>}</div>)}</ResumeSection>;
           if (section === "education" && data.education.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.education.map((item) => <div className="resume-entry compact-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.qualification || "Qualification"}</h3><p>{item.institution}{item.location ? ` · ${item.location}` : ""}</p></div><DateRange start={item.start} end={item.end} /></div>{item.grade && <p>{item.grade}</p>}{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
           if (section === "skills" && data.skills.length) return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-skills">{data.skills.map((skill) => <span key={skill.id}>{skill.name}</span>)}</div></ResumeSection>;
-          if (section === "projects" && data.projects.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.projects.map((item) => <div className="resume-entry compact-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.name}</h3><p>{item.role}{item.technologies ? ` · ${item.technologies}` : ""}</p></div></div>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
+          if (section === "projects" && data.projects.some(projectHasContent)) return <ResumeSection key={section} title={sectionLabels[section]}>{data.projects.filter(projectHasContent).map((item) => <div className="resume-entry compact-entry resume-project-entry" key={item.id}><div className="resume-entry-heading"><div className="resume-entry-main">{item.name && <h3>{item.name}</h3>}{(item.role || item.technologies) && <p className="resume-project-meta">{item.role}{item.role && item.technologies ? " · " : ""}{item.technologies}</p>}</div>{item.url && <a className="resume-project-link" href={toExternalUrl(item.url)} target="_blank" rel="noreferrer"><ExternalLink />{item.url.replace(/^https?:\/\//, "")}</a>}</div>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
           if (section === "certifications" && data.certifications.length) return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-inline-list">{data.certifications.map((item) => <span key={item.id}><strong>{item.name}</strong> · {item.issuer}{item.date ? `, ${item.date}` : ""}</span>)}</div></ResumeSection>;
           if (section === "languages" && data.languages.length) return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-inline-list">{data.languages.map((item) => <span key={item.id}><strong>{item.name}</strong> · {item.proficiency}</span>)}</div></ResumeSection>;
           if (section === "awards" && data.awards.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.awards.map((item) => <div className="resume-entry compact-entry" key={item.id}><h3>{item.name}</h3><p>{item.issuer}{item.date ? ` · ${item.date}` : ""}</p>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
@@ -62,6 +64,8 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
 function ResumeSection({ title, children }: { title: string; children: React.ReactNode }) {
   return <section className="resume-section"><h2>{title}</h2>{children}</section>;
 }
+
+function toExternalUrl(value: string) { return /^https?:\/\//i.test(value) ? value : `https://${value}`; }
 
 function renderInline(text: string) {
   return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_)/g).filter(Boolean).map((part, index) => {
