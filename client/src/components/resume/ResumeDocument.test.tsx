@@ -46,12 +46,14 @@ describe("expanded template rendering", () => {
 
   it("renders formatted summary and project descriptions", () => {
     const base = sampleResumeData("modern");
-    const data = { ...base, summary: "**Product leader** with *clarity*.", projects: [{ ...base.projects[0], url: "portfolio.example.com/case-study", description: "- Built a polished experience" }] };
+    const data = { ...base, summary: "**Product leader** with *clarity*.", projects: [{ ...base.projects[0], liveDemoUrl: "portfolio.example.com/demo", githubUrl: "github.com/alex/project", caseStudyUrl: "portfolio.example.com/case-study", description: "- Built a polished experience" }] };
     render(<ResumeDocument template="modern" data={data} />);
     expect(screen.getByText("Product leader").tagName).toBe("STRONG");
     expect(screen.getByText("clarity").tagName).toBe("EM");
     expect(screen.getByText("Built a polished experience")).toBeTruthy();
-    expect(screen.getByRole("link", { name: /portfolio\.example\.com\/case-study/ }).getAttribute("href")).toBe("https://portfolio.example.com/case-study");
+    expect(screen.getByRole("link", { name: "Live demo" }).getAttribute("href")).toBe("https://portfolio.example.com/demo");
+    expect(screen.getByRole("link", { name: "GitHub" }).getAttribute("href")).toBe("https://github.com/alex/project");
+    expect(screen.getByRole("link", { name: "Case study" }).getAttribute("href")).toBe("https://portfolio.example.com/case-study");
   });
 
   it("shows experience as role, company, location, dates, and work without empty placeholders", () => {
@@ -63,6 +65,19 @@ describe("expanded template rendering", () => {
     expect(screen.getByText("2022 — 2024")).toBeTruthy();
     expect(screen.getByText("Led the platform.")).toBeTruthy();
     expect(screen.queryByText("Role title")).toBeNull();
+  });
+
+  it("sorts experience newest first and supports a compact ATS presentation", () => {
+    const base = sampleResumeData("modern");
+    const data = { ...base, theme: { ...base.theme, atsMode: true }, photoUrl: "https://images.example.test/photo.jpg", experiences: [
+      { ...base.experiences[0], id: "older", role: "Older role", start: "2019", end: "2021", current: false },
+      { ...base.experiences[0], id: "newer", role: "Newer role", start: "2023", end: "", current: true },
+    ] };
+    const { container } = render(<ResumeDocument template="modern" data={data} />);
+    const headings = Array.from(container.querySelectorAll(".resume-experience-entry h3")).map((heading) => heading.textContent);
+    expect(headings).toEqual(["Newer role", "Older role"]);
+    expect(container.querySelector(".resume-ats")).not.toBeNull();
+    expect(container.querySelector(".resume-ats .resume-photo")).toBeNull();
   });
 
   it("renders formatted education, awards, and volunteer descriptions", () => {

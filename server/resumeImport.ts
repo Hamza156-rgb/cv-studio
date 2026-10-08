@@ -220,7 +220,7 @@ export function parseResumeText(text: string): ResumeData {
   const detectedKnownSkills = knownSkills.filter((skill) => new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}\\b`, "i").test(skillText));
   const detectedLooseSkills = unique((sections.get("skills") ?? []).flatMap((line) => line.split(/[,;|•]/))).map((value) => value.replace(/100%|[^\w#+./()& -]/g, "").trim()).filter((value) => value.length > 1 && !/^page\b/i.test(value));
   result.skills = unique(detectedKnownSkills.length ? detectedKnownSkills : detectedLooseSkills).map((name) => ({ id: id(), name, level: "Advanced" as const })).slice(0, 40);
-  result.projects = (sections.get("projects") ?? []).filter(Boolean).slice(0, 8).map((name) => ({ id: id(), name, role: "", url: "", description: "", technologies: "" }));
+  result.projects = (sections.get("projects") ?? []).filter(Boolean).slice(0, 8).map((name) => ({ id: id(), name, role: "", liveDemoUrl: "", githubUrl: "", caseStudyUrl: "", description: "", technologies: "" }));
   result.certifications = (sections.get("certifications") ?? []).slice(0, 8).map((name) => ({ id: id(), name, issuer: "", date: "", credentialUrl: "" }));
   result.languages = (sections.get("languages") ?? []).flatMap((line) => line.split(/[,;|]/)).map((name) => ({ id: id(), name: name.trim(), proficiency: "Fluent" as const })).filter((item) => item.name).slice(0, 12);
   result.awards = (sections.get("awards") ?? []).slice(0, 8).map((name) => ({ id: id(), name, issuer: "", date: "", description: "" }));

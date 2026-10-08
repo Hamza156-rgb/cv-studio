@@ -270,3 +270,24 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .resume-project-link:hover { text-decoration: underline; }
 .resume-project-link svg { flex: 0 0 auto; height: 2.7mm; width: 2.7mm; }
 @media print { .resume-project-link { color: inherit; text-decoration: underline; } }
+
+/* Experience sorting and ATS mode */
+.collection-tools { align-items: center; color: #71807b; display: flex; font-size: 11px; justify-content: space-between; margin: -4px 0 12px; }
+.sort-experience-button { align-items: center; background: #f1f5f1; border: 1px solid #d5e1da; border-radius: 999px; color: #28584e; cursor: pointer; display: inline-flex; font-size: 11px; gap: 6px; padding: 7px 11px; }
+.sort-experience-button:hover { background: #e7f0eb; }
+.ats-mode-toggle { background: #f6f3ed; border: 1px solid #d9d3c9; border-radius: 8px; color: #53635e; cursor: pointer; font-size: 12px; font-weight: 600; padding: 10px 12px; text-align: left; width: 100%; }
+.ats-mode-toggle.selected { background: #e5eee8; border-color: #9db9aa; color: #1f5145; }
+.resume-project-links { align-items: center; display: flex; flex-wrap: wrap; gap: 2mm; justify-content: flex-end; }
+.resume-project-link { max-width: none; }
+.resume-ats { background: #fff !important; border: 0 !important; box-shadow: none !important; color: #111 !important; font-family: Arial, Helvetica, sans-serif !important; }
+.resume-ats .resume-header { background: #fff !important; border: 0; border-bottom: 1.5px solid #111 !important; border-radius: 0 !important; color: #111 !important; padding-bottom: 7mm; }
+.resume-ats .resume-identity h1, .resume-ats .resume-role, .resume-ats .resume-contact span, .resume-ats .resume-contact svg, .resume-ats .resume-section h2, .resume-ats .resume-entry h3, .resume-ats .resume-company-line strong, .resume-ats .resume-project-link { color: #111 !important; }
+.resume-ats .resume-role { font-size: 10pt; letter-spacing: 0; text-transform: none; }
+.resume-ats .resume-contact svg { display: none; }
+.resume-ats .resume-section h2 { border-bottom: 1px solid #111 !important; font-size: 9pt; letter-spacing: .04em; padding-bottom: 1.5mm; text-transform: uppercase; }
+.resume-ats .resume-photo, .resume-ats .resume-photo-placeholder { display: none !important; }
+.resume-ats .resume-experience-entry { border-left: 0; padding-left: 0; }
+.resume-ats .resume-experience-entry .resume-date { background: transparent; border-radius: 0; color: #111 !important; padding: 0; }
+.resume-ats .resume-project-entry { border-top: 0; padding-top: 0; }
+.resume-ats .resume-project-link svg { display: none; }
+@media (max-width: 680px) { .collection-tools { align-items: flex-start; flex-direction: column; gap: 8px; } .resume-project-links { justify-content: flex-start; margin-top: 2mm; } }
