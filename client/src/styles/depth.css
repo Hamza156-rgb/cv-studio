@@ -1,0 +1,99 @@
+/*
+ * Depth layer — 3D scenes, pointer tilt and scroll reveals.
+ * Driven by components/effects/MotionEffects.tsx:
+ *   [data-tilt]   receives --tilt-x/--tilt-y/--glare-x/--glare-y while hovered
+ *   [data-reveal] receives .is-revealed once in view (only when <html> has .reveal-ready)
+ *   --px/--py     pointer position (-1…1) on parallax containers
+ */
+
+/* ---------- Pointer tilt ---------- */
+[data-tilt][data-tilt] {
+  position: relative;
+  transform: perspective(1000px) translateY(var(--tilt-lift, 0px)) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: opacity .8s var(--ease-out) var(--reveal-delay, 0ms), transform .7s var(--ease-out) var(--reveal-delay, 0ms), box-shadow .3s ease, background-color .2s ease, border-color .2s ease;
+}
+[data-tilt][data-tilt]:hover { --tilt-lift: -6px; }
+[data-tilt][data-tilt].is-tilting { transition: transform .14s linear, box-shadow .3s ease, background-color .2s ease, border-color .2s ease; will-change: transform; }
+[data-tilt]::after { background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 0%), rgba(255, 255, 255, .38), transparent 58%); border-radius: inherit; content: ""; inset: 0; opacity: 0; pointer-events: none; position: absolute; transition: opacity .35s ease; z-index: 3; }
+[data-tilt].is-tilting::after { opacity: 1; }
+.feature-list > div[data-tilt]::after { background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 0%), rgba(255, 255, 255, .12), transparent 60%); }
+
+/* ---------- Scroll reveal ---------- */
+[data-reveal] { transition: opacity .8s var(--ease-out) var(--reveal-delay, 0ms), transform .9s var(--ease-out) var(--reveal-delay, 0ms), box-shadow .3s ease, background-color .2s ease, border-color .2s ease; }
+.reveal-ready [data-reveal][data-reveal]:not(.is-revealed) { opacity: 0; transform: perspective(1200px) translateY(40px) rotateX(12deg) scale(.98); transform-origin: 50% 100%; }
+
+/* ---------- Tactile primary buttons ---------- */
+.button.bg-primary { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 2px 0 #0c2527, 0 6px 16px rgba(16, 43, 45, .22); }
+.button.bg-primary:hover:not(:disabled) { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 3px 0 #0c2527, 0 10px 24px rgba(16, 43, 45, .26); transform: translateY(-1px); }
+.button.bg-primary:active:not(:disabled) { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 0 #0c2527, 0 3px 8px rgba(16, 43, 45, .2); transform: translateY(2px); }
+
+/* ---------- Hero: stacked 3D documents ---------- */
+.hero-scene { inset: 0; perspective: 1600px; perspective-origin: 50% 40%; position: absolute; }
+.hero-float, .hero-stage { inset: 0; position: absolute; transform-style: preserve-3d; }
+.hero-stage { transform: rotateY(calc(-14deg + var(--px, 0) * 10deg)) rotateX(calc(7deg - var(--py, 0) * 8deg)); transition: transform 1s var(--ease-out); }
+.hero.is-parallax .hero-stage { transition: transform .3s ease-out; }
+.hero-page, .hero-stage .hero-document { left: 70px; position: absolute; top: 22px; transition: transform .8s var(--ease-out); }
+.hero-page .resume-thumbnail { --thumb: .46; border-radius: 6px; box-shadow: 0 18px 40px rgba(16, 43, 45, .14); }
+.hero-page-back { transform: translate3d(74px, -38px, -170px) rotate(6deg); }
+.hero-page-mid { transform: translate3d(38px, -18px, -85px) rotate(2.5deg); }
+.hero-stage .hero-document { transform: translateZ(0) rotate(-2deg); }
+.hero.is-parallax .hero-page-back { transform: translate3d(104px, -54px, -190px) rotate(8deg); }
+.hero.is-parallax .hero-page-mid { transform: translate3d(54px, -26px, -95px) rotate(4deg); }
+.hero-stage .hero-tag-top { transform: translateZ(120px); }
+.hero-stage .hero-tag-bottom { transform: translateZ(160px); }
+.hero-ground { z-index: -1; background: radial-gradient(closest-side, rgba(16, 43, 45, .24), transparent); border-radius: 50%; bottom: -4px; height: 64px; left: 80px; pointer-events: none; position: absolute; width: 440px; }
+
+/* ---------- Floating 3D papers (final CTA, auth) ---------- */
+.final-cta .container > :not(.cta-papers) { position: relative; z-index: 1; }
+.cta-papers { inset: 0; perspective: 1000px; pointer-events: none; position: absolute; }
+.cta-paper { --depth: 18px; align-content: start; background: linear-gradient(160deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, .04)); border: 1px solid rgba(255, 255, 255, .16); border-radius: 12px; box-shadow: 0 30px 60px rgba(0, 0, 0, .28); display: grid; gap: 9px; height: 168px; padding: 20px 16px; position: absolute; transform: translate3d(calc(var(--px, 0) * var(--depth)), calc(var(--py, 0) * var(--depth)), 0) var(--pose); transition: transform .6s var(--ease-out); width: 126px; }
+.cta-paper i { background: rgba(255, 255, 255, .22); border-radius: 3px; display: block; height: 6px; }
+.cta-paper i:first-child { background: rgba(240, 196, 179, .6); height: 10px; width: 62%; }
+.cta-paper i:nth-child(2) { width: 92%; }
+.cta-paper i:nth-child(3) { width: 74%; }
+.cta-paper i:nth-child(4) { width: 84%; }
+.cta-paper-1 { --depth: 26px; --pose: rotateX(14deg) rotateY(32deg) rotateZ(-12deg); left: 5%; top: 14%; }
+.cta-paper-2 { --depth: 14px; --pose: rotateX(-10deg) rotateY(24deg) rotateZ(8deg) scale(.78); bottom: 10%; left: 13%; }
+.cta-paper-3 { --depth: 30px; --pose: rotateX(12deg) rotateY(-30deg) rotateZ(10deg); right: 5%; top: 12%; }
+.cta-paper-4 { --depth: 16px; --pose: rotateX(-12deg) rotateY(-22deg) rotateZ(-6deg) scale(.74); bottom: 12%; right: 14%; }
+
+.auth-papers { z-index: 0; }
+.auth-papers .cta-paper { background: linear-gradient(160deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .7)); border-color: var(--line); box-shadow: var(--shadow-md); }
+.auth-papers .cta-paper i { background: #e3e6e1; }
+.auth-papers .cta-paper i:first-child { background: color-mix(in oklab, var(--rust), white 55%); }
+.auth-papers .cta-paper-1 { left: 3%; top: auto; bottom: 9%; }
+.auth-papers .cta-paper-2 { bottom: auto; left: 44%; top: 6%; }
+.auth-papers .cta-paper-3 { right: 3%; top: auto; bottom: 7%; }
+.auth-layout, .auth-topbar { z-index: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-float { animation: hero-float 9s ease-in-out infinite; }
+  .hero-ground { animation: hero-ground 9s ease-in-out infinite; }
+  .cta-paper { animation: paper-bob 11s ease-in-out infinite; }
+  .cta-paper-2 { animation-delay: -3s; animation-duration: 13s; }
+  .cta-paper-3 { animation-delay: -6s; }
+  .cta-paper-4 { animation-delay: -8s; animation-duration: 14s; }
+  .dashboard-empty > span { animation: icon-bob 5s ease-in-out infinite; }
+}
+@keyframes hero-float { 0%, 100% { transform: translate3d(0, 0, 0) rotateZ(0deg); } 50% { transform: translate3d(0, -14px, 0) rotateZ(.6deg); } }
+@keyframes hero-ground { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .7; transform: scale(.9); } }
+@keyframes paper-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -16px; } }
+@keyframes icon-bob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(-4deg); } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1050px) {
+  .cta-paper-2, .cta-paper-4 { display: none; }
+  .auth-papers { display: none; }
+}
+@media (max-width: 800px) {
+  .hero-stage { transform: rotateY(-10deg) rotateX(6deg); }
+  .hero-page-back { transform: translate3d(54px, -30px, -140px) rotate(5deg); }
+  .hero-page-mid { transform: translate3d(28px, -14px, -70px) rotate(2.5deg); }
+  .cta-paper { height: 110px; opacity: .45; padding: 12px 10px; width: 82px; }
+  .cta-paper-1 { left: -34px; top: -26px; }
+  .cta-paper-3 { bottom: -30px; right: -30px; top: auto; }
+  [data-tilt][data-tilt]:hover { --tilt-lift: 0px; }
+}
+@media print {
+  .reveal-ready [data-reveal][data-reveal]:not(.is-revealed) { opacity: 1; transform: none; }
+}
