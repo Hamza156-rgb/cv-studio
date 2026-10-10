@@ -15,6 +15,14 @@ function safeFileName(value: string) {
   return (value || "Resume").trim().replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "") || "Resume";
 }
 
+// The editor stores light markdown (**bold**, *italic*, "- " lists); the PDF renders it as plain text.
+function plainText(value: string) {
+  return value
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/(^|\n)\s*[-•]\s+/g, "$1•  ");
+}
+
 export function downloadResumePdf({ data, title, template }: { data: ResumeData; title: string; template: ResumeTemplateId }) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
   const accent = colorFromHex(data.theme.accent);
@@ -33,7 +41,7 @@ export function downloadResumePdf({ data, title, template }: { data: ResumeData;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(size);
     doc.setTextColor(color[0], color[1], color[2]);
-    const lines = doc.splitTextToSize(value, pageWidth - margin * 2 - indent);
+    const lines = doc.splitTextToSize(plainText(value), pageWidth - margin * 2 - indent);
     ensureSpace(lines.length * (size * 0.47) + 2);
     doc.text(lines, margin + indent, y);
     y += lines.length * (size * 0.47) + 2.2;
@@ -51,7 +59,10 @@ export function downloadResumePdf({ data, title, template }: { data: ResumeData;
     doc.text(name.toUpperCase(), margin, y);
     y += 4.6;
   };
-  const entry = (primary: string, secondary: string, date: string, description?: string, highlights?: string[]) => {
+  const entry = (heading: string, subheading: string, date: string, description?: string, highlights?: string[]) => {
+    // Fall back to the subheading (e.g. company) when the main title is blank.
+    const [primary, secondary] = heading ? [heading, subheading] : [subheading, ""];
+    if (!primary && !date && !description?.trim() && !highlights?.some(Boolean)) return;
     const titleLines = doc.splitTextToSize(primary || "Untitled entry", 123);
     const secondaryLines = secondary ? doc.splitTextToSize(secondary, 123) : [];
     const required = (titleLines.length + secondaryLines.length) * 4 + (description ? 6 : 0) + (highlights?.length ?? 0) * 4 + 3;
@@ -74,13 +85,11 @@ export function downloadResumePdf({ data, title, template }: { data: ResumeData;
   doc.setFont(headingFont, "bold");
   doc.setFontSize(template === "executive" ? 25 : 27);
   doc.setTextColor(accent[0], accent[1], accent[2]);
-  doc.text(data.fullName || "Your name", margin, y);
-  y += 7.6;
+  if (data.fullName) { doc.text(data.fullName, margin, y); y += 7.6; }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(text[0], text[1], text[2]);
-  doc.text(data.professionalTitle || "Professional title", margin, y);
-  y += 6;
+  if (data.professionalTitle) { doc.text(data.professionalTitle, margin, y); y += 6; }
   const contacts = [data.email, data.phone, data.location, data.website, data.linkedin, data.github].filter(Boolean).join("   ·   ");
   writeParagraph(contacts, 7.7, 0, [81, 101, 98]);
   y += 1;
@@ -98,5 +107,5 @@ export function downloadResumePdf({ data, title, template }: { data: ResumeData;
     if (key === "volunteer" && data.volunteer.length) { section("Volunteer work"); data.volunteer.forEach((item) => entry(item.role, item.organization, [item.start, item.end].filter(Boolean).join(" — "), item.description)); }
     if (key === "interests" && data.interests.filter(Boolean).length) { section("Interests"); writeParagraph(data.interests.filter(Boolean).join("  ·  ")); }
   });
-  doc.save(`${safeFileName(title || data.fullName)}_CV.pdf`);
+  doc.save(`${safeFileName(title && title !== "Untitled resume" ? title : data.fullName)}_CV.pdf`);
 }

@@ -2,7 +2,22 @@
 // Uploads via Forge Server presigned URL to S3 (PUT direct).
 // Downloads return /manus-storage/{key} paths served via 307 redirect.
 
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { ENV } from "./_core/env";
+
+// Without Forge credentials (e.g. local development) files are written to disk
+// and served by the storage proxy from the same /manus-storage/{key} URLs.
+export const LOCAL_STORAGE_DIR = path.resolve(process.cwd(), "uploads");
+
+export function isForgeStorageConfigured() {
+  return Boolean(ENV.forgeApiUrl && ENV.forgeApiKey);
+}
+
+export function resolveLocalStoragePath(relKey: string): string | null {
+  const filePath = path.resolve(LOCAL_STORAGE_DIR, normalizeKey(relKey));
+  return filePath.startsWith(LOCAL_STORAGE_DIR + path.sep) ? filePath : null;
+}
 
 function getForgeConfig() {
   const forgeUrl = ENV.forgeApiUrl;
@@ -33,8 +48,17 @@ export async function storagePut(
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream",
 ): Promise<{ key: string; url: string }> {
-  const { forgeUrl, forgeKey } = getForgeConfig();
   const key = appendHashSuffix(normalizeKey(relKey));
+
+  if (!isForgeStorageConfigured()) {
+    const filePath = resolveLocalStoragePath(key);
+    if (!filePath) throw new Error("Invalid storage key");
+    await mkdir(path.dirname(filePath), { recursive: true });
+    await writeFile(filePath, data);
+    return { key, url: `/manus-storage/${key}` };
+  }
+
+  const { forgeUrl, forgeKey } = getForgeConfig();
 
   // 1. Get presigned PUT URL from Forge
   const presignUrl = new URL("v1/storage/presign/put", forgeUrl + "/");

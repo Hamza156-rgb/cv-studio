@@ -31,4 +31,17 @@ describe("expanded template PDF export", () => {
     expect(pdf.document.save).toHaveBeenCalledTimes(templates.length);
     expect(pdf.document.save).toHaveBeenLastCalledWith("boutique_QA_CV.pdf");
   });
+
+  it("renders formatted text as plain text and titles blank entries by organization", () => {
+    const data = sampleResumeData("modern");
+    data.summary = "**Engineer** with *calm* focus\n- First point";
+    data.volunteer = [{ id: "v1", organization: "Code Club", role: "", start: "", end: "", description: "" }];
+    downloadResumePdf({ data, template: "modern", title: "Untitled resume" });
+    const written = pdf.document.splitTextToSize.mock.calls.map(([value]) => String(value));
+    expect(written).toContain("Engineer with calm focus\n•  First point");
+    expect(written.some((value) => value.includes("*"))).toBe(false);
+    expect(written).toContain("Code Club");
+    expect(written).not.toContain("Untitled entry");
+    expect(pdf.document.save).toHaveBeenLastCalledWith("Alex_Morgan_CV.pdf");
+  });
 });

@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import { isForgeStorageConfigured, resolveLocalStoragePath } from "../storage";
 import { ENV } from "./env";
 
 export function registerStorageProxy(app: Express) {
@@ -9,8 +10,15 @@ export function registerStorageProxy(app: Express) {
       return;
     }
 
-    if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
-      res.status(500).send("Storage proxy not configured");
+    if (!isForgeStorageConfigured()) {
+      const filePath = resolveLocalStoragePath(key);
+      if (!filePath) {
+        res.status(400).send("Invalid storage key");
+        return;
+      }
+      res.sendFile(filePath, { dotfiles: "deny" }, (err) => {
+        if (err && !res.headersSent) res.status(404).send("File not found");
+      });
       return;
     }
 
