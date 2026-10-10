@@ -5,6 +5,7 @@ import superjson from "superjson";
 import App from "./App";
 import { trpc } from "./lib/trpc";
 import "./index.css";
+import "./styles/polish.css";
 
 const queryClient = new QueryClient();
 const redirectToCredentialLogin = (error: unknown) => { if (error instanceof TRPCClientError && error.data?.code === "UNAUTHORIZED" && typeof window !== "undefined" && !["/login", "/signup"].includes(window.location.pathname)) window.location.assign("/login"); };
