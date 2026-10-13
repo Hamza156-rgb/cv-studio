@@ -200,6 +200,11 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .resume-entry .resume-rich-list { margin: 1mm 0 1.4mm; padding-left: 4mm; }
 .resume-entry .resume-rich-list li { margin: .7mm 0; }
 .resume-entry .resume-rich-paragraph + .resume-rich-paragraph { margin-top: 1.4mm; }
+.resume-entry ul { list-style: disc; }
+.resume-entry ol { list-style: decimal; margin: 1mm 0 1.4mm; padding-left: 4.6mm; }
+.resume-entry li::marker { color: var(--resume-accent); }
+.resume-rich-subheading { color: var(--resume-text); font-size: 1.02em; font-weight: 700; line-height: 1.35; margin: 3mm 0 1mm; }
+.resume-work-content > .resume-rich-subheading:first-child { margin-top: 0; }
 @media (max-width: 800px) { .rich-text-toolbar span { display: none; } }
 
 /* Pro writing controls */
@@ -215,6 +220,7 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .rich-text-toolbar .rich-text-clear { padding: 0 7px; }
 .rich-text-toolbar-tip { color: #89958f; font-size: 9px; margin-left: auto; white-space: nowrap; }
 .rich-text-field textarea.editor-textarea { background: #fff; border: 0; border-radius: 0; min-height: 150px; outline: 0; padding: 14px; resize: vertical; }
+.rich-text-field textarea.editor-textarea { field-sizing: content; line-height: 1.6; max-height: 560px; overflow-y: auto; }
 .rich-text-field textarea.editor-textarea:focus { box-shadow: inset 0 0 0 2px rgba(78,137,120,.16); }
 .rich-text-footer { align-items: center; background: #fbfcfa; border-top: 1px solid #edf0eb; color: #89958f; display: flex; font-size: 9px; gap: 14px; justify-content: space-between; padding: 7px 10px; }
 .rich-text-footer strong { color: #486d60; font-weight: 700; }
@@ -310,3 +316,17 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 .entry-move-actions button { align-items: center; background: #fff; border: 1px solid #dcded7; border-radius: 4px; color: #5c716b; cursor: pointer; display: inline-flex; font-size: 14px; height: 24px; justify-content: center; line-height: 1; padding: 0; width: 24px; }
 .entry-move-actions button:hover, .entry-move-actions button:focus-visible { background: #e8f1eb; border-color: #8bb3a1; color: #245a4d; }
 @media (max-width: 680px) { .entry-drag-handle { min-height: 36px; min-width: 34px; } .entry-move-actions button { height: 32px; width: 32px; } }
+
+/* Server-side PDF export (/render/resume): the live preview's document, paginated for A4. */
+@page cv-export { size: A4; margin: 14mm 0; }
+@page cv-export:first { margin-top: 0; }
+html.pdf-render, html.pdf-render body { background: #fff; margin: 0; padding: 0; }
+html.pdf-render body { page: cv-export; }
+html.pdf-render .resume-document { margin: 0; min-height: 0; padding-bottom: 0; }
+html.pdf-render .resume-section { break-inside: auto; }
+html.pdf-render .resume-section h2, html.pdf-render .resume-entry-heading, html.pdf-render .resume-rich-subheading { break-after: avoid; }
+html.pdf-render .resume-entry { break-inside: auto; }
+html.pdf-render .resume-entry-heading, html.pdf-render .resume-entry li, html.pdf-render .resume-rich-paragraph, html.pdf-render .compact-entry { break-inside: avoid; }
+html.pdf-render > :not(head):not(body), html.pdf-render body > :not(#root) { display: none !important; }
+/* Chrome prints blurred shadows as solid grey blocks, so photos keep only their border. */
+html.pdf-render .resume-modern .resume-photo, html.pdf-render .resume-modern .resume-photo-placeholder, html.pdf-render .resume-horizon .resume-photo, html.pdf-render .resume-editorial .resume-photo { box-shadow: none !important; }

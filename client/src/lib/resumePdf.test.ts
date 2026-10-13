@@ -1,47 +1,31 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { sampleResumeData, type ResumeTemplateId } from "@shared/resume";
-
-const pdf = vi.hoisted(() => {
-  const document = {
-    addPage: vi.fn(),
-    line: vi.fn(),
-    save: vi.fn(),
-    setDrawColor: vi.fn(),
-    setFont: vi.fn(),
-    setFontSize: vi.fn(),
-    setLineWidth: vi.fn(),
-    setTextColor: vi.fn(),
-    splitTextToSize: vi.fn((value: string) => [value]),
-    text: vi.fn(),
-  };
-  return { document, jsPDF: vi.fn(() => document) };
-});
-
-vi.mock("jspdf", () => ({ jsPDF: pdf.jsPDF }));
-
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { sampleResumeData } from "@shared/resume";
 import { downloadResumePdf } from "./resumePdf";
 
-describe("expanded template PDF export", () => {
-  beforeEach(() => vi.clearAllMocks());
+describe("server-rendered PDF download", () => {
+  afterEach(() => vi.unstubAllGlobals());
 
-  it("exports every newly added template through the shared PDF pipeline", () => {
-    const templates: ResumeTemplateId[] = ["atlas", "horizon", "monograph", "ledger", "boutique"];
-    templates.forEach((template) => downloadResumePdf({ data: sampleResumeData(template), template, title: `${template} QA` }));
-    expect(pdf.jsPDF).toHaveBeenCalledTimes(templates.length);
-    expect(pdf.document.save).toHaveBeenCalledTimes(templates.length);
-    expect(pdf.document.save).toHaveBeenLastCalledWith("boutique_QA_CV.pdf");
+  it("posts the live-preview data and saves the returned PDF under the server's file name", async () => {
+    const click = vi.fn();
+    const link = { click, remove: vi.fn(), href: "", download: "" };
+    vi.stubGlobal("document", { createElement: vi.fn(() => link), body: { appendChild: vi.fn() } });
+    vi.stubGlobal("URL", { createObjectURL: vi.fn(() => "blob:cv"), revokeObjectURL: vi.fn() });
+    vi.stubGlobal("window", { setTimeout: vi.fn() });
+    const fetchMock = vi.fn(async () => new Response(new Blob(["%PDF-1.4"]), { status: 200, headers: { "Content-Disposition": 'attachment; filename="Alex_Morgan_CV.pdf"' } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const data = sampleResumeData("atlas");
+    const fileName = await downloadResumePdf({ data, template: "atlas", title: "Untitled resume" });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/resume/pdf", expect.objectContaining({ method: "POST" }));
+    expect(JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string)).toMatchObject({ template: "atlas", title: "Untitled resume", data: { fullName: data.fullName } });
+    expect(fileName).toBe("Alex_Morgan_CV.pdf");
+    expect(link.download).toBe("Alex_Morgan_CV.pdf");
+    expect(click).toHaveBeenCalled();
   });
 
-  it("renders formatted text as plain text and titles blank entries by organization", () => {
-    const data = sampleResumeData("modern");
-    data.summary = "**Engineer** with *calm* focus\n- First point";
-    data.volunteer = [{ id: "v1", organization: "Code Club", role: "", start: "", end: "", description: "" }];
-    downloadResumePdf({ data, template: "modern", title: "Untitled resume" });
-    const written = pdf.document.splitTextToSize.mock.calls.map(([value]) => String(value));
-    expect(written).toContain("Engineer with calm focus\n•  First point");
-    expect(written.some((value) => value.includes("*"))).toBe(false);
-    expect(written).toContain("Code Club");
-    expect(written).not.toContain("Untitled entry");
-    expect(pdf.document.save).toHaveBeenLastCalledWith("Alex_Morgan_CV.pdf");
+  it("surfaces the server's error message", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ message: "The PDF service is busy." }), { status: 429 })));
+    await expect(downloadResumePdf({ data: sampleResumeData("modern"), template: "modern", title: "CV" })).rejects.toThrow("The PDF service is busy.");
   });
 });

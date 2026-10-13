@@ -33,7 +33,7 @@ describe("resume import parsing", () => {
     expect(data.fullName).toBe("Taylor Reed");
     expect(data.professionalTitle).toBe("Senior Product Designer");
     expect(data.email).toBe("taylor@example.com");
-    expect(data.experiences[0]).toMatchObject({ role: "Senior Product Designer", company: "Northstar Systems", start: "2021", end: "Present", current: true });
+    expect(data.experiences[0]).toMatchObject({ role: "Senior Product Designer", company: "Northstar Systems", start: "2021", end: "", current: true });
     expect(data.experiences[0]?.highlights).toHaveLength(2);
     expect(data.education[0]).toMatchObject({ qualification: "BFA Interaction Design", institution: "California College of the Arts", start: "2012", end: "2016" });
     expect(data.skills.map((skill) => skill.name)).toEqual(["Figma", "Research", "Design systems", "Prototyping"]);
@@ -45,9 +45,26 @@ describe("resume import parsing", () => {
     expect(data.professionalTitle).toBe("Full Stack Software Engineer");
     expect(data.summary).toContain("MERN & MEAN Stack Developer");
     expect(data.experiences).toHaveLength(2);
-    expect(data.experiences[1]).toMatchObject({ company: "BINARY TECH NovFEB 2026", start: "2022", end: "2026" });
+    expect(data.experiences[0]).toMatchObject({ company: "Techbang", start: "Mar 2026", current: true });
+    expect(data.experiences[1]).toMatchObject({ company: "BINARY TECH", start: "Nov 2022", end: "Feb 2026", current: false });
+    expect(data.experiences[1]?.highlights).toEqual(["Contributed as a MEAN Stack Developer."]);
     expect(data.education[0]).toMatchObject({ qualification: "BSCS - Bachelor's", institution: "Lahore Garrison University Lahore", start: "2017", end: "2021" });
     expect(data.skills.map((skill) => skill.name)).toContain("Angular 9/17");
+  });
+
+  it("re-flows wrapped OCR lines into project headings, paragraphs and complete bullets", () => {
+    const data = parseResumeText(`Jo Doe\nWork Experience\nFull Stack Software Engineer\nTechbanq (March 2026)\nJEEYM — Enterprise Collaboration Platform\nFull-stack multi-tenant SaaS unifying email, chat, calendar, video meetings, and real-time collaborative\ndocs/spreadsheets into a single workspace.\nTech stack:\nTypeScript - React 19 - Node.js/Express - tRPC - MySQL (Drizzle ORM) - Socket.lO + Redis - LiveKit -\nYjs/Tiptap - Railway\n= Led a development team delivering the platform end to end — architecture decisions, code review,\nand release ownership across a 250k-line TypeScript monorepo.\nPage 1 of 4\n= Integrated LiveKit with Al-generated meeting summaries.\nBreeze Admin Panel\nRole: Full-Stack Developer\nEducation\nBSCS\nLahore Garrison University (2017-2021)`);
+    expect(data.experiences).toHaveLength(1);
+    expect(data.experiences[0]?.description).toBe([
+      "**JEEYM — Enterprise Collaboration Platform**",
+      "Full-stack multi-tenant SaaS unifying email, chat, calendar, video meetings, and real-time collaborative docs/spreadsheets into a single workspace.",
+      "**Tech stack:** TypeScript - React 19 - Node.js/Express - tRPC - MySQL (Drizzle ORM) - Socket.IO + Redis - LiveKit - Yjs/Tiptap - Railway",
+      "- Led a development team delivering the platform end to end — architecture decisions, code review, and release ownership across a 250k-line TypeScript monorepo.",
+      "- Integrated LiveKit with AI-generated meeting summaries.",
+      "**Breeze Admin Panel**",
+      "**Role:** Full-Stack Developer",
+    ].join("\n"));
+    expect(data.phone).toBe("");
   });
 
   it("does not accept a ZIP-shaped DOCX unless the document parser can read it", async () => {

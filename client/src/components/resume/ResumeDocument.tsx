@@ -79,17 +79,23 @@ function renderInline(text: string) {
   });
 }
 
+const BULLET_LINE = /^\s*[-•]\s+/;
+const ORDERED_LINE = /^\s*\d+[.)]\s+/;
+
 function FormattedText({ text }: { text: string }) {
   const lines = text.split(/\r?\n/);
   const content: React.ReactNode[] = [];
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
-    if (/^\s*[-•]\s+/.test(line)) {
+    const pattern = BULLET_LINE.test(line) ? BULLET_LINE : ORDERED_LINE.test(line) ? ORDERED_LINE : null;
+    if (pattern) {
       const items: string[] = [];
-      while (index < lines.length && /^\s*[-•]\s+/.test(lines[index])) { items.push(lines[index].replace(/^\s*[-•]\s+/, "")); index += 1; }
+      while (index < lines.length && pattern.test(lines[index])) { items.push(lines[index].replace(pattern, "")); index += 1; }
       index -= 1;
-      content.push(<ul className="resume-rich-list" key={`list-${index}`}>{items.map((item, itemIndex) => <li key={itemIndex}>{renderInline(item)}</li>)}</ul>);
-    } else if (line.trim()) content.push(<p className="resume-rich-paragraph" key={`line-${index}`}>{renderInline(line)}</p>);
+      const children = items.map((item, itemIndex) => <li key={itemIndex}>{renderInline(item)}</li>);
+      content.push(pattern === BULLET_LINE ? <ul className="resume-rich-list" key={`list-${index}`}>{children}</ul> : <ol className="resume-rich-list" key={`list-${index}`}>{children}</ol>);
+    } else if (/^\s*\*\*[^*]+\*\*\s*$/.test(line)) content.push(<h4 className="resume-rich-subheading" key={`heading-${index}`}>{line.trim().slice(2, -2)}</h4>);
+    else if (line.trim()) content.push(<p className="resume-rich-paragraph" key={`line-${index}`}>{renderInline(line)}</p>);
   }
   return <>{content}</>;
 }
