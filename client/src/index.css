@@ -350,3 +350,26 @@ html.pdf-render .resume-modern .resume-photo, html.pdf-render .resume-modern .re
 .template-compare-actions button { align-items: center; background: #fff; border: 1px solid #d8dcd5; border-radius: 5px; color: #34534e; display: inline-flex; font-size: 10px; font-weight: 600; height: 26px; justify-content: center; min-width: 26px; padding: 0 8px; }
 .template-compare-actions button:disabled { opacity: .55; }
 .template-compare-actions .template-compare-current { align-items: center; color: #2f6b5b; display: inline-flex; font-size: 10px; font-weight: 600; gap: 3px; }
+
+/* Polished formatting toolbar: icon-only tools in soft groups with hover tooltips. */
+.rich-text-field .rich-text-toolbar { background: linear-gradient(180deg, #fdfdfb, #f5f7f3); flex-wrap: wrap; gap: 8px; min-height: 48px; padding: 7px 9px; }
+.rich-text-field .rich-text-toolbar-group { background: #fff; border: 1px solid #e1e7e2; border-radius: 9px; box-shadow: 0 1px 2px rgba(31,58,52,.05); gap: 2px; padding: 3px; }
+.rich-text-field .rich-text-history { margin-left: auto; }
+.rich-text-field .rich-text-toolbar button.rich-text-tool { background: transparent; border: 0; border-radius: 6px; color: #3f5f57; height: 30px; padding: 0; position: relative; transition: background .14s ease, color .14s ease, transform .14s ease; width: 32px; }
+.rich-text-field .rich-text-toolbar button.rich-text-tool:hover:not(:disabled) { background: #e3efe9; color: #1d4d43; }
+.rich-text-field .rich-text-toolbar button.rich-text-tool:active:not(:disabled) { background: #d2e6dc; transform: scale(.94); }
+.rich-text-field .rich-text-toolbar button.rich-text-tool:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #7fb2a1; outline: 0; }
+.rich-text-field .rich-text-toolbar button.rich-text-tool:disabled { color: #bcc6c1; cursor: not-allowed; }
+.rich-text-tool[data-tip]::after { background: #1f3a35; border-radius: 5px; bottom: calc(100% + 7px); box-shadow: 0 4px 12px rgba(20,40,36,.22); color: #f3f8f5; content: attr(data-tip); font-size: 10.5px; font-weight: 500; left: 50%; opacity: 0; padding: 5px 8px; pointer-events: none; position: absolute; transform: translate(-50%, 3px); transition: opacity .12s ease, transform .12s ease; white-space: nowrap; z-index: 30; }
+.rich-text-tool[data-tip]:hover:not(:disabled)::after, .rich-text-tool[data-tip]:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+.rich-text-field { overflow: visible; }
+.rich-text-field > .rich-text-toolbar { border-radius: 8px 8px 0 0; }
+.rich-text-field > .rich-text-footer { border-radius: 0 0 8px 8px; }
+
+/* Section navigation: a tinted icon tile per section, with a check badge once it is complete. */
+.section-icon { align-items: center; background: #eef3ef; border: 1px solid #dfe8e2; border-radius: 9px; color: #557a6f; display: inline-flex; flex: 0 0 auto; height: 32px; justify-content: center; position: relative; transition: background .16s ease, color .16s ease, border-color .16s ease; width: 32px; }
+.section-nav-item:hover .section-icon { background: #e4eee8; color: #2f6556; }
+.section-nav-item.active .section-icon { background: linear-gradient(145deg, #2c5c55, #3f7d6c); border-color: transparent; box-shadow: 0 4px 10px rgba(36,82,72,.25); color: #fff; }
+.section-icon.done { color: #2f6a5a; }
+.section-icon-check { align-items: center; background: #3f9a74; border: 2px solid #fbfaf7; border-radius: 50%; bottom: -4px; color: #fff; display: inline-flex; height: 15px; justify-content: center; position: absolute; right: -4px; width: 15px; }
+.section-nav-item.active .section-icon-check { border-color: #fff; }
