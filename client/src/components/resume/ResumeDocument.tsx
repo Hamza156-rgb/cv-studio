@@ -1,6 +1,10 @@
-import type { ResumeData, ResumeTemplateId } from "@shared/resume";
+import { RESUME_TEMPLATES, type ResumeData, type ResumeTemplateId } from "@shared/resume";
 import { AtSign, ExternalLink, Github, Globe2, Linkedin, MapPin, Phone } from "lucide-react";
 import React from "react";
+
+// Two-column templates move these supporting sections into a side column.
+const SIDEBAR_TEMPLATES = new Set<ResumeTemplateId>(["meridian"]);
+const SIDEBAR_SECTIONS = new Set<string>(["skills", "education", "languages", "certifications", "interests"]);
 
 type Props = { data: ResumeData; template: ResumeTemplateId; className?: string };
 
@@ -12,7 +16,7 @@ function DateRange({ start, end, current }: { start: string; end: string; curren
 }
 
 export function ResumeDocument({ data, template, className = "" }: Props) {
-  const photoAllowed = template === "modern" || template === "executive" || template === "studio" || template === "portrait" || template === "horizon" || template === "boutique" || template === "editorial";
+  const photoAllowed = RESUME_TEMPLATES.some((item) => item.id === template && item.supportsPhoto);
   const initials = data.fullName.split(/\s+/).filter(Boolean).map((part) => part[0]).slice(0, 2).join("").toUpperCase() || "CV";
   const visible = (key: keyof typeof sectionLabels) => !data.hiddenSections.includes(key);
   const hasContacts = Boolean(data.email || data.phone || data.location || data.website || data.linkedin || data.github);
@@ -20,6 +24,23 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
   const experienceHasContent = (item: ResumeData["experiences"][number]) => Boolean(item.role || item.company || item.location || item.start || item.end || item.current || item.description || item.highlights.some(Boolean));
   const projectHasContent = (item: ResumeData["projects"][number]) => Boolean(item.name || item.role || item.liveDemoUrl || item.githubUrl || item.caseStudyUrl || item.url || item.description || item.technologies);
   const sortedExperiences = data.theme.experienceOrderMode === "manual" ? data.experiences : [...data.experiences].sort(compareExperiences);
+
+  const renderSection = (section: ResumeData["sectionOrder"][number]): React.ReactNode => {
+    if (!visible(section)) return null;
+    if (section === "summary") return <ResumeSection key={section} section={section} title={sectionLabels[section]}><div className="resume-summary"><FormattedText text={summary} /></div></ResumeSection>;
+    if (section === "experience" && sortedExperiences.some(experienceHasContent)) return <ResumeSection key={section} section={section} title={sectionLabels[section]}>{sortedExperiences.filter(experienceHasContent).map((item) => <div className="resume-entry resume-experience-entry" key={item.id}><div className="resume-entry-heading"><div className="resume-entry-main">{item.role && <h3>{item.role}</h3>}{(item.company || item.location) && <p className="resume-company-line">{item.company && <strong>{item.company}</strong>}{item.company && item.location && <span className="resume-meta-separator"> · </span>}{item.location && <span>{item.location}</span>}</p>}</div><DateRange start={item.start} end={item.end} current={item.current} /></div>{item.description && <div className="resume-work-content"><FormattedText text={item.description} /></div>}{item.highlights.filter(Boolean).length > 0 && <ul className="resume-achievements">{item.highlights.filter(Boolean).map((line, index) => <li key={`${item.id}-${index}`}>{line}</li>)}</ul>}</div>)}</ResumeSection>;
+    if (section === "education" && data.education.length) return <ResumeSection key={section} section={section} title={sectionLabels[section]}>{data.education.map((item) => <div className="resume-entry compact-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.qualification || "Qualification"}</h3><p>{item.institution}{item.location ? ` · ${item.location}` : ""}</p></div><DateRange start={item.start} end={item.end} /></div>{item.grade && <p>{item.grade}</p>}{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
+    if (section === "skills" && data.skills.length) return <ResumeSection key={section} section={section} title={sectionLabels[section]}><div className="resume-skills">{data.skills.map((skill) => <span key={skill.id}>{skill.name}</span>)}</div></ResumeSection>;
+    if (section === "projects" && data.projects.some(projectHasContent)) return <ResumeSection key={section} section={section} title={sectionLabels[section]}>{data.projects.filter(projectHasContent).map((item) => <div className="resume-entry compact-entry resume-project-entry" key={item.id}><div className="resume-entry-heading"><div className="resume-entry-main">{item.name && <h3>{item.name}</h3>}{(item.role || item.technologies) && <p className="resume-project-meta">{item.role}{item.role && item.technologies ? " · " : ""}{item.technologies}</p>}</div><div className="resume-project-links">{(item.liveDemoUrl || item.url) && <a className="resume-project-link" href={toExternalUrl(item.liveDemoUrl || item.url || "")} target="_blank" rel="noreferrer"><ExternalLink />Live demo</a>}{item.githubUrl && <a className="resume-project-link" href={toExternalUrl(item.githubUrl)} target="_blank" rel="noreferrer"><ExternalLink />GitHub</a>}{item.caseStudyUrl && <a className="resume-project-link" href={toExternalUrl(item.caseStudyUrl)} target="_blank" rel="noreferrer"><ExternalLink />Case study</a>}</div></div>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
+    if (section === "certifications" && data.certifications.some((item) => item.name)) return <ResumeSection key={section} section={section} title={sectionLabels[section]}><div className="resume-inline-list">{data.certifications.filter((item) => item.name).map((item) => { const details = [item.issuer, item.date].filter(Boolean).join(", "); return <span key={item.id}><strong>{item.name}</strong>{details ? ` · ${details}` : ""}</span>; })}</div></ResumeSection>;
+    if (section === "languages" && data.languages.some((item) => item.name)) return <ResumeSection key={section} section={section} title={sectionLabels[section]}><div className="resume-inline-list">{data.languages.filter((item) => item.name).map((item) => <span key={item.id}><strong>{item.name}</strong>{item.proficiency ? ` · ${item.proficiency}` : ""}</span>)}</div></ResumeSection>;
+    if (section === "awards" && data.awards.length) return <ResumeSection key={section} section={section} title={sectionLabels[section]}>{data.awards.map((item) => <div className="resume-entry compact-entry" key={item.id}><h3>{item.name}</h3><p>{item.issuer}{item.date ? ` · ${item.date}` : ""}</p>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
+    if (section === "volunteer" && data.volunteer.length) return <ResumeSection key={section} section={section} title={sectionLabels[section]}>{data.volunteer.map((item) => <div className="resume-entry compact-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.role}</h3><p>{item.organization}</p></div><DateRange start={item.start} end={item.end} /></div>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
+    if (section === "interests" && data.interests.filter(Boolean).length) return <ResumeSection key={section} section={section} title={sectionLabels[section]}><p className="resume-interests">{data.interests.filter(Boolean).join(" · ")}</p></ResumeSection>;
+    return null;
+  };
+  const renderedSections = data.sectionOrder.map((section) => ({ section, node: renderSection(section) }));
+  const sidebarLayout = SIDEBAR_TEMPLATES.has(template);
 
   return (
     <article
@@ -43,28 +64,13 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
         {!data.theme.atsMode && photoAllowed && (data.photoUrl ? <img className={`resume-photo photo-${data.theme.photoShape}`} src={data.photoUrl} alt={`${data.fullName || "Resume"} headshot`} /> : (template === "portrait" || template === "modern" || template === "editorial") ? <div className="resume-photo resume-photo-placeholder" aria-label="Headshot placement">{initials}</div> : null)}
       </header>
 
-      <div className="resume-body">
-        {data.sectionOrder.map((section) => {
-          if (!visible(section)) return null;
-          if (section === "summary") return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-summary"><FormattedText text={summary} /></div></ResumeSection>;
-          if (section === "experience" && sortedExperiences.some(experienceHasContent)) return <ResumeSection key={section} title={sectionLabels[section]}>{sortedExperiences.filter(experienceHasContent).map((item) => <div className="resume-entry resume-experience-entry" key={item.id}><div className="resume-entry-heading"><div className="resume-entry-main">{item.role && <h3>{item.role}</h3>}{(item.company || item.location) && <p className="resume-company-line">{item.company && <strong>{item.company}</strong>}{item.company && item.location && <span className="resume-meta-separator"> · </span>}{item.location && <span>{item.location}</span>}</p>}</div><DateRange start={item.start} end={item.end} current={item.current} /></div>{item.description && <div className="resume-work-content"><FormattedText text={item.description} /></div>}{item.highlights.filter(Boolean).length > 0 && <ul className="resume-achievements">{item.highlights.filter(Boolean).map((line, index) => <li key={`${item.id}-${index}`}>{line}</li>)}</ul>}</div>)}</ResumeSection>;
-          if (section === "education" && data.education.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.education.map((item) => <div className="resume-entry compact-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.qualification || "Qualification"}</h3><p>{item.institution}{item.location ? ` · ${item.location}` : ""}</p></div><DateRange start={item.start} end={item.end} /></div>{item.grade && <p>{item.grade}</p>}{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
-          if (section === "skills" && data.skills.length) return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-skills">{data.skills.map((skill) => <span key={skill.id}>{skill.name}</span>)}</div></ResumeSection>;
-          if (section === "projects" && data.projects.some(projectHasContent)) return <ResumeSection key={section} title={sectionLabels[section]}>{data.projects.filter(projectHasContent).map((item) => <div className="resume-entry compact-entry resume-project-entry" key={item.id}><div className="resume-entry-heading"><div className="resume-entry-main">{item.name && <h3>{item.name}</h3>}{(item.role || item.technologies) && <p className="resume-project-meta">{item.role}{item.role && item.technologies ? " · " : ""}{item.technologies}</p>}</div><div className="resume-project-links">{(item.liveDemoUrl || item.url) && <a className="resume-project-link" href={toExternalUrl(item.liveDemoUrl || item.url || "")} target="_blank" rel="noreferrer"><ExternalLink />Live demo</a>}{item.githubUrl && <a className="resume-project-link" href={toExternalUrl(item.githubUrl)} target="_blank" rel="noreferrer"><ExternalLink />GitHub</a>}{item.caseStudyUrl && <a className="resume-project-link" href={toExternalUrl(item.caseStudyUrl)} target="_blank" rel="noreferrer"><ExternalLink />Case study</a>}</div></div>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
-          if (section === "certifications" && data.certifications.some((item) => item.name)) return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-inline-list">{data.certifications.filter((item) => item.name).map((item) => { const details = [item.issuer, item.date].filter(Boolean).join(", "); return <span key={item.id}><strong>{item.name}</strong>{details ? ` · ${details}` : ""}</span>; })}</div></ResumeSection>;
-          if (section === "languages" && data.languages.some((item) => item.name)) return <ResumeSection key={section} title={sectionLabels[section]}><div className="resume-inline-list">{data.languages.filter((item) => item.name).map((item) => <span key={item.id}><strong>{item.name}</strong>{item.proficiency ? ` · ${item.proficiency}` : ""}</span>)}</div></ResumeSection>;
-          if (section === "awards" && data.awards.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.awards.map((item) => <div className="resume-entry compact-entry" key={item.id}><h3>{item.name}</h3><p>{item.issuer}{item.date ? ` · ${item.date}` : ""}</p>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
-          if (section === "volunteer" && data.volunteer.length) return <ResumeSection key={section} title={sectionLabels[section]}>{data.volunteer.map((item) => <div className="resume-entry compact-entry" key={item.id}><div className="resume-entry-heading"><div><h3>{item.role}</h3><p>{item.organization}</p></div><DateRange start={item.start} end={item.end} /></div>{item.description && <FormattedText text={item.description} />}</div>)}</ResumeSection>;
-          if (section === "interests" && data.interests.filter(Boolean).length) return <ResumeSection key={section} title={sectionLabels[section]}><p className="resume-interests">{data.interests.filter(Boolean).join(" · ")}</p></ResumeSection>;
-          return null;
-        })}
-      </div>
+      {sidebarLayout ? <div className="resume-body resume-columns"><div className="resume-main">{renderedSections.filter((item) => !SIDEBAR_SECTIONS.has(item.section)).map((item) => item.node)}</div><aside className="resume-aside">{renderedSections.filter((item) => SIDEBAR_SECTIONS.has(item.section)).map((item) => item.node)}</aside></div> : <div className="resume-body">{renderedSections.map((item) => item.node)}</div>}
     </article>
   );
 }
 
-function ResumeSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="resume-section"><h2>{title}</h2>{children}</section>;
+function ResumeSection({ title, section, children }: { title: string; section: string; children: React.ReactNode }) {
+  return <section className={`resume-section resume-section-${section}`}><h2>{title}</h2>{children}</section>;
 }
 
 function compareExperiences(a: ResumeData["experiences"][number], b: ResumeData["experiences"][number]) { const score = (item: ResumeData["experiences"][number]) => item.current ? Number.POSITIVE_INFINITY : Number.parseInt((item.start || item.end || "0").match(/\d{4}/)?.[0] ?? "0", 10); return score(b) - score(a); }

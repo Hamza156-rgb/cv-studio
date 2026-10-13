@@ -320,7 +320,8 @@ em { color: var(--rust); font-family: "Newsreader", Georgia, serif; font-style: 
 /* Server-side PDF export (/render/resume): the live preview's document, paginated for A4. */
 @page cv-export { size: A4; margin: 14mm 0; }
 @page cv-export:first { margin-top: 0; }
-html.pdf-render, html.pdf-render body { background: #fff; margin: 0; padding: 0; }
+html.pdf-render { margin: 0; padding: 0; }
+html.pdf-render body { background: transparent; margin: 0; padding: 0; }
 html.pdf-render body { page: cv-export; }
 html.pdf-render .resume-document { margin: 0; min-height: 0; padding-bottom: 0; }
 html.pdf-render .resume-section { break-inside: auto; }
@@ -373,3 +374,91 @@ html.pdf-render .resume-modern .resume-photo, html.pdf-render .resume-modern .re
 .section-icon.done { color: #2f6a5a; }
 .section-icon-check { align-items: center; background: #3f9a74; border: 2px solid #fbfaf7; border-radius: 50%; bottom: -4px; color: #fff; display: inline-flex; height: 15px; justify-content: center; position: absolute; right: -4px; width: 15px; }
 .section-nav-item.active .section-icon-check { border-color: #fff; }
+
+/* ---------- Harvard: Ivy League format — centered serif header, ruled sections, black and white. ---------- */
+.resume-harvard { color: #111; font-family: Georgia, "Times New Roman", serif; padding: 15mm 17mm; }
+.resume-harvard .resume-header { border-bottom: 0; display: block; padding-bottom: 1mm; text-align: center; }
+.resume-harvard .resume-identity h1 { color: #111; font-family: Georgia, "Times New Roman", serif; font-size: 22pt; letter-spacing: 0; margin-bottom: 1.4mm; }
+.resume-harvard .resume-role { font-size: 10.5pt; font-style: italic; font-weight: 400; margin-bottom: 2mm; }
+.resume-harvard .resume-contact { gap: 1mm 0; justify-content: center; }
+.resume-harvard .resume-contact span { color: #222; font-size: 8.6pt; }
+.resume-harvard .resume-contact span + span::before { color: #777; content: "|"; margin: 0 2.2mm; }
+.resume-harvard .resume-contact svg { display: none; }
+.resume-harvard .resume-body { padding-top: 3mm; }
+.resume-harvard .resume-section { margin-bottom: 4.2mm; }
+.resume-harvard .resume-section h2 { border-bottom: .9px solid #111; color: #111; font-family: Georgia, "Times New Roman", serif; font-size: 10.5pt; letter-spacing: .06em; margin-bottom: 2.4mm; padding-bottom: 1mm; }
+.resume-harvard .resume-experience-entry { border-left: 0; padding-left: 0; }
+.resume-harvard .resume-entry h3, .resume-harvard .resume-rich-subheading { color: #111; }
+.resume-harvard .resume-entry h3 { font-weight: 700; }
+.resume-harvard .resume-company-line, .resume-harvard .resume-company-line strong { color: #111; font-style: italic; font-weight: 400; }
+.resume-harvard .resume-company-line span, .resume-harvard .resume-entry p { color: #222; }
+.resume-harvard .resume-date, .resume-harvard .resume-experience-entry .resume-date { background: transparent; border-radius: 0; color: #111; font-family: Georgia, "Times New Roman", serif; font-size: 9pt; font-weight: 400; padding: 0; }
+.resume-harvard .resume-skills { display: block; }
+.resume-harvard .resume-skills span { background: transparent; border-radius: 0; color: #111; font-family: Georgia, "Times New Roman", serif; font-size: 9.2pt; font-weight: 400; padding: 0; }
+.resume-harvard .resume-skills span:not(:last-child)::after { content: ", "; }
+.resume-harvard li::marker { color: #111; }
+
+/* ---------- Precision: dense single-column engineering resume (Jake's Resume style). ---------- */
+.resume-precision { color: #111; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 9pt; line-height: 1.38; padding: 12mm 14mm; }
+.resume-precision .resume-header { border-bottom: 0; display: block; padding-bottom: 0; text-align: center; }
+.resume-precision .resume-identity h1 { color: #111; font-size: 24pt; font-variant: small-caps; letter-spacing: .01em; margin-bottom: 1mm; }
+.resume-precision .resume-role { font-size: 9.5pt; font-weight: 500; margin-bottom: 1.6mm; }
+.resume-precision .resume-contact { gap: .8mm 0; justify-content: center; }
+.resume-precision .resume-contact span { color: #111; font-size: 8.4pt; }
+.resume-precision .resume-contact span + span::before { content: "|"; margin: 0 2mm; }
+.resume-precision .resume-contact svg { display: none; }
+.resume-precision .resume-body { padding-top: 2.5mm; }
+.resume-precision .resume-section { margin-bottom: 3.4mm; }
+.resume-precision .resume-section h2 { border-bottom: .8px solid #111; color: #111; font-family: inherit; font-size: 11pt; font-variant: small-caps; letter-spacing: .02em; margin-bottom: 1.8mm; padding-bottom: .5mm; text-transform: none; }
+.resume-precision .resume-entry { margin-bottom: 2.8mm; }
+.resume-precision .resume-experience-entry { border-left: 0; padding-left: 0; }
+.resume-precision .resume-entry h3 { color: #111; font-size: 9.8pt; font-weight: 700; }
+.resume-precision .resume-company-line, .resume-precision .resume-company-line strong { color: #111; font-size: 9pt; font-style: italic; font-weight: 400; }
+.resume-precision .resume-company-line span { color: #333; font-size: 8.6pt; }
+.resume-precision .resume-date, .resume-precision .resume-experience-entry .resume-date { background: transparent; border-radius: 0; color: #111; font-family: inherit; font-size: 8.8pt; font-weight: 400; padding: 0; }
+.resume-precision .resume-work-content { margin-top: 1.2mm; }
+.resume-precision .resume-entry li { margin: .25mm 0; }
+.resume-precision .resume-rich-subheading { color: #111; font-size: 9.4pt; margin: 1.8mm 0 .5mm; }
+.resume-precision .resume-entry p { color: #222; font-size: 8.8pt; margin: .3mm 0 .8mm; }
+.resume-precision .resume-skills { display: block; }
+.resume-precision .resume-skills span { background: transparent; border-radius: 0; color: #111; font-family: inherit; font-size: 9pt; font-weight: 400; padding: 0; }
+.resume-precision .resume-skills span:not(:last-child)::after { content: ", "; }
+.resume-precision li::marker { color: #111; }
+
+/* ---------- Chronicle: timeline layout with dates in a left rail. ---------- */
+.resume-chronicle { padding: 15mm 16mm; }
+.resume-chronicle .resume-header { border-bottom: 2px solid var(--resume-accent); }
+.resume-chronicle .resume-section h2 { align-items: center; border-bottom: 0; display: flex; gap: 3mm; padding-bottom: 0; }
+.resume-chronicle .resume-section h2::after { background: color-mix(in srgb, var(--resume-accent) 22%, white); content: ""; flex: 1; height: .8px; }
+.resume-chronicle .resume-entry { padding-left: 31mm; position: relative; }
+.resume-chronicle .resume-experience-entry { border-left: 0; }
+.resume-chronicle .resume-entry-heading { display: block; }
+.resume-chronicle .resume-entry .resume-date, .resume-chronicle .resume-experience-entry .resume-date { background: transparent; border-radius: 0; color: var(--resume-accent); font-size: 8pt; font-weight: 700; left: 0; padding: 0; position: absolute; text-align: left; top: .5mm; white-space: normal; width: 23mm; }
+.resume-chronicle .resume-experience-entry::before { background: color-mix(in srgb, var(--resume-accent) 22%, white); bottom: -4.1mm; content: ""; left: 26.7mm; position: absolute; top: 1.2mm; width: .6mm; }
+.resume-chronicle .resume-experience-entry::after { background: #fff; border: .6mm solid var(--resume-accent); border-radius: 50%; content: ""; height: 2.6mm; left: 25.7mm; position: absolute; top: .9mm; width: 2.6mm; }
+.resume-chronicle .resume-experience-entry:last-child::before { bottom: 0; }
+
+/* ---------- Meridian: two columns with a tinted side panel (painted as the page's right border). ---------- */
+.resume-meridian { border-right: 64mm solid color-mix(in srgb, var(--resume-accent) 8%, white); padding: 0 0 14mm 15mm; }
+.resume-meridian .resume-header { align-items: center; background: var(--resume-accent); border-bottom: 0; color: #fff; margin: 0 -64mm 0 -15mm; padding: 13mm 15mm 11mm; }
+.resume-meridian .resume-identity h1, .resume-meridian .resume-role { color: #fff; }
+.resume-meridian .resume-contact span, .resume-meridian .resume-contact svg { color: color-mix(in srgb, #fff 86%, var(--resume-accent)); }
+.resume-meridian .resume-photo { border: 1.2mm solid rgba(255,255,255,.85); }
+.resume-meridian .resume-columns { column-gap: 0; display: grid; grid-template-columns: minmax(0, 1fr) 64mm; margin-right: -64mm; padding-top: 0; }
+.resume-meridian .resume-main { min-width: 0; padding: 8mm 8mm 0 0; }
+.resume-meridian .resume-aside { min-width: 0; padding: 8mm 9mm 0 8mm; }
+.resume-meridian .resume-aside .resume-section h2 { border-bottom-color: color-mix(in srgb, var(--resume-accent) 30%, white); }
+.resume-meridian .resume-aside .resume-entry-heading { display: block; }
+.resume-meridian .resume-aside .resume-date { display: block; margin-top: .6mm; text-align: left; }
+.resume-meridian .resume-aside .resume-skills span { background: #fff; }
+
+/* ---------- Summit: bold corporate format with solid accent section bars. ---------- */
+.resume-summit { border-top: 5mm solid var(--resume-accent); padding: 12mm 16mm 16mm; }
+.resume-summit .resume-header { border-bottom: 0; padding-bottom: 3mm; }
+.resume-summit .resume-identity h1 { color: #141c1c; font-size: 25pt; letter-spacing: .02em; text-transform: uppercase; }
+.resume-summit .resume-role { color: var(--resume-accent); font-size: 9.6pt; letter-spacing: .14em; text-transform: uppercase; }
+.resume-summit .resume-section h2 { background: var(--resume-accent); border-bottom: 0; color: #fff; font-size: 8.6pt; letter-spacing: .14em; margin-bottom: 3mm; padding: 1.3mm 2.6mm; }
+.resume-summit .resume-experience-entry { border-left: 0; padding-left: 0; }
+.resume-summit .resume-entry h3 { font-weight: 700; }
+.resume-summit .resume-experience-entry .resume-date { background: transparent; border-radius: 0; color: #141c1c; font-size: 8.4pt; font-weight: 700; padding: 0; }
+.resume-summit .resume-skills span { background: transparent; border: .6px solid color-mix(in srgb, var(--resume-accent) 45%, white); border-radius: 1mm; }

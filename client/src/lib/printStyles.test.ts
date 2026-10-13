@@ -7,7 +7,7 @@ const stylesheet = readFileSync(resolve(process.cwd(), "client/src/index.css"), 
 
 describe("shared print styling", () => {
   it("keeps every new template inside the same printable resume document container", () => {
-    const newTemplates = ["atlas", "horizon", "monograph", "ledger", "boutique"];
+    const newTemplates = ["atlas", "horizon", "monograph", "ledger", "boutique", "harvard", "precision", "chronicle", "meridian", "summit"];
     expect(stylesheet).toContain("@media print");
     expect(stylesheet).toContain(".resume-document, .resume-document * { visibility: visible !important; }");
     newTemplates.forEach((template) => {

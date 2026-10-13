@@ -12,6 +12,11 @@ export const RESUME_TEMPLATES = [
   { id: "ledger", name: "Ledger", category: "Finance", description: "A disciplined, data-led format for finance, operations, and business roles.", ats: true, supportsPhoto: false },
   { id: "boutique", name: "Boutique", category: "Creative", description: "A boutique studio-inspired profile with space for a memorable headshot.", ats: false, supportsPhoto: true },
   { id: "editorial", name: "Editorial", category: "Photo-forward", description: "A premium modern layout with a bold masthead, headshot, and highly scannable project history.", ats: false, supportsPhoto: true },
+  { id: "harvard", name: "Harvard", category: "Graduate", description: "The classic Ivy League format: centered serif header, ruled sections, and a pure black-and-white ATS-safe page.", ats: true, supportsPhoto: false },
+  { id: "precision", name: "Precision", category: "Developer", description: "A dense single-column engineering resume in the style of the popular Jake's Resume — fits more projects per page.", ats: true, supportsPhoto: false },
+  { id: "chronicle", name: "Chronicle", category: "Corporate", description: "A timeline layout with dates in a left rail, so career progression reads at a glance.", ats: true, supportsPhoto: false },
+  { id: "meridian", name: "Meridian", category: "Professional", description: "A two-column layout with a tinted side panel for skills, education, and languages, plus room for a headshot.", ats: false, supportsPhoto: true },
+  { id: "summit", name: "Summit", category: "Leadership", description: "A bold corporate format with a strong name block and solid accent section bars for senior roles.", ats: true, supportsPhoto: false },
 ] as const;
 
 export type ResumeTemplateId = (typeof RESUME_TEMPLATES)[number]["id"];
