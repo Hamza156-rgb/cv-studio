@@ -1,4 +1,4 @@
-import type { Express, Request } from "express";
+import type { Express, Request, Response } from "express";
 import type { Browser } from "puppeteer";
 import { z } from "zod";
 import { RESUME_TEMPLATES, normalizeResumeData } from "../shared/resume";
@@ -61,23 +61,31 @@ function localOrigin(req: Request) {
   return `http://127.0.0.1:${req.socket.localPort}`;
 }
 
+type PdfFailure = (res: Response, status: 429 | 500, message: string) => void;
+const sendWebFailure: PdfFailure = (res, status, message) => { res.status(status).json({ message }); };
+
+/** Renders and sends a resume PDF, enforcing the shared render concurrency limit. */
+export async function sendResumePdf(req: Request, res: Response, input: { data: unknown; template: string; title: string }, fail: PdfFailure = sendWebFailure) {
+  if (activeRenders >= MAX_CONCURRENT_RENDERS) { fail(res, 429, "The PDF service is busy. Please try again in a moment."); return; }
+  activeRenders += 1;
+  try {
+    const data = normalizeResumeData(input.data, input.template as any);
+    const pdf = await renderResumePdf(localOrigin(req), { data, template: input.template });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${pdfFileName(input.title, data.fullName)}"`);
+    res.send(Buffer.from(pdf));
+  } catch (error) {
+    console.error("[ResumePdf] render failed", error);
+    fail(res, 500, "We could not create the PDF. Please try again.");
+  } finally {
+    activeRenders -= 1;
+  }
+}
+
 export function registerResumePdfRoute(app: Express) {
   app.post("/api/resume/pdf", async (req, res) => {
     const parsed = pdfInput.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ message: "Invalid resume data." }); return; }
-    if (activeRenders >= MAX_CONCURRENT_RENDERS) { res.status(429).json({ message: "The PDF service is busy. Please try again in a moment." }); return; }
-    activeRenders += 1;
-    try {
-      const data = normalizeResumeData(parsed.data.data, parsed.data.template as any);
-      const pdf = await renderResumePdf(localOrigin(req), { data, template: parsed.data.template });
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${pdfFileName(parsed.data.title, data.fullName)}"`);
-      res.send(Buffer.from(pdf));
-    } catch (error) {
-      console.error("[ResumePdf] render failed", error);
-      res.status(500).json({ message: "We could not create the PDF. Please try again." });
-    } finally {
-      activeRenders -= 1;
-    }
+    await sendResumePdf(req, res, { data: parsed.data.data, template: parsed.data.template, title: parsed.data.title });
   });
 }

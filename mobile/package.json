@@ -1,0 +1,51 @@
+{
+  "name": "cv-studio-mobile",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "resume-css": "node scripts/extract-resume-css.mjs",
+    "dev": "npm run resume-css && vite",
+    "build": "npm run resume-css && tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "sync": "npm run build && npm run cap -- sync",
+    "ios": "npm run sync && npm run cap -- open ios",
+    "android": "npm run sync && npm run cap -- open android",
+    "cap": "npx -y -p node@22 node node_modules/@capacitor/cli/bin/capacitor"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/camera": "8.2.6",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/ios": "8.5.3",
+    "@capacitor/preferences": "8.0.1",
+    "@capacitor/share": "8.0.3",
+    "@ionic/react": "9.0.8",
+    "@ionic/react-router": "9.0.8",
+    "ionicons": "8.1.0",
+    "lucide-react": "0.453.0",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "react-router": "6",
+    "react-router-dom": "6"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3",
+    "@types/react": "^19.2.1",
+    "@types/react-dom": "^19.2.1",
+    "@vitejs/plugin-react": "^5.0.4",
+    "jsdom": "^25",
+    "postcss": "^8",
+    "typescript": "5.9.3",
+    "vite": "^7.1.7",
+    "vitest": "^2.1.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

@@ -31,7 +31,7 @@ export function decodeResumePhoto(dataUrl: string) {
   return { mimeType, bytes };
 }
 
-function toResumeDto(resume: { id: number; title: string; template: string; data: string; createdAt: Date; updatedAt: Date }) {
+export function toResumeDto(resume: { id: number; title: string; template: string; data: string; createdAt: Date; updatedAt: Date }) {
   const template = RESUME_TEMPLATES.some((item) => item.id === resume.template) ? resume.template as (typeof templateIds)[number] : "modern";
   let rawData: unknown = {};
   try { rawData = JSON.parse(resume.data); } catch { rawData = {}; }

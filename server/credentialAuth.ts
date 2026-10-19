@@ -30,12 +30,16 @@ export async function verifyPassword(password: string, stored: string) {
   return expected.length === derived.length && timingSafeEqual(expected, derived);
 }
 
-export async function issueCredentialSession(userId: number) {
-  return new SignJWT({ type: "credentials" }).setProtectedHeader({ alg: "HS256" }).setSubject(String(userId)).setIssuedAt().setExpirationTime(`${CREDENTIAL_SESSION_MAX_AGE}s`).setJti(createHash("sha256").update(randomBytes(24)).digest("hex")).sign(sessionKey);
+export async function issueCredentialSession(userId: number, maxAgeSeconds = CREDENTIAL_SESSION_MAX_AGE) {
+  return new SignJWT({ type: "credentials" }).setProtectedHeader({ alg: "HS256" }).setSubject(String(userId)).setIssuedAt().setExpirationTime(`${maxAgeSeconds}s`).setJti(createHash("sha256").update(randomBytes(24)).digest("hex")).sign(sessionKey);
 }
 
 export async function getCredentialSessionUser(req: { headers: { cookie?: string } }) {
-  const token = parse(req.headers.cookie ?? "")[CREDENTIAL_SESSION_COOKIE];
+  return getUserForSessionToken(parse(req.headers.cookie ?? "")[CREDENTIAL_SESSION_COOKIE]);
+}
+
+/** Resolves a session token (web cookie or mobile `Authorization: Bearer`) to its user. */
+export async function getUserForSessionToken(token: string | undefined) {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, sessionKey, { algorithms: ["HS256"] });
