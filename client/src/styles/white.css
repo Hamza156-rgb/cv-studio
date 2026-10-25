@@ -1,0 +1,37 @@
+/* =====================================================================
+   White theme. Loaded last so it overrides the original warm-cream
+   canvas: pages are pure white, secondary panels a near-white neutral,
+   and borders neutral grey. Brand ink, terracotta and mint accents stay.
+   Delete this file's import in main.tsx to return to the cream look.
+   ===================================================================== */
+:root {
+  --canvas: #ffffff;
+  --surface: #ffffff;
+  --sand: #f2f4f3;
+  --line: #e6e9e8;
+  --line-strong: #d5dad8;
+  --panel: #f7f8f8;      /* sidebars, toolbars, secondary bars */
+  --stage: #eef1f0;      /* behind white resume "paper" so it stands out */
+  --background: oklch(1 0 0);
+}
+
+html, body { background: #fff; }
+
+/* Page shells */
+.template-page, .app-loading, .editor-error, .dashboard-auth, .dashboard-shell, .editor-shell, .import-review { background: #fff; }
+
+/* Secondary panels and bars */
+.editor-sidebar { background: var(--panel); border-right-color: var(--line); }
+.photo-picker, .optional-section-actions, .import-data-preview { background: var(--panel); border-color: var(--line); }
+.entry-card header, .rich-text-toolbar { background: var(--panel); border-bottom-color: var(--line); }
+.button.border:hover:not(:disabled), .action-menu-button:hover, .button-like:hover { background: var(--panel); }
+.section-icon-check { border-color: var(--panel); }
+
+/* Resume stages: white paper on a soft neutral */
+@media screen {
+  .editor-shell .preview-pane { background: var(--stage); }
+  .editor-shell .preview-canvas { background-color: var(--stage); }
+}
+.template-compare-card { background: #fff; border-color: var(--line); }
+.template-compare-preview { background: var(--stage); }
+

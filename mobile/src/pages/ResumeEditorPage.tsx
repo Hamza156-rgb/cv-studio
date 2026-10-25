@@ -1,35 +1,39 @@
-import {
-  IonAccordion, IonAccordionGroup, IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonModal,
-  IonPage, IonSegment, IonSegmentButton, IonSelect, IonSelectOption, IonSpinner, IonTitle, IonToggle, IonToolbar, useIonToast, useIonViewWillLeave,
-} from "@ionic/react";
-import { normalizeResumeData, type ResumeData, type ResumeSectionKey, type ResumeTemplateId } from "@shared/resume";
-import { addOutline, arrowDown, arrowUp, checkmarkCircle, cloudDoneOutline, cloudOfflineOutline, downloadOutline, eyeOffOutline, eyeOutline, imageOutline, trashOutline } from "ionicons/icons";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { IonContent, IonFooter, IonHeader, IonModal, IonPage, IonToggle, useIonRouter, useIonToast, useIonViewWillEnter, useIonViewWillLeave } from "@ionic/react";
+import { normalizeResumeData, RESUME_TEMPLATES, type ResumeData, type ResumeTemplateId } from "@shared/resume";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, ChevronDown, CloudOff, Download, Eye, EyeOff, ImagePlus, Images, LoaderCircle, Palette, Plus, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { absoluteAssetUrl, api, ApiError, type Photo, type Template } from "../api/client";
+import { absoluteAssetUrl, api, ApiError, type Photo } from "../api/client";
 import { RichTextArea } from "../components/RichTextArea";
 import { ResumePreview } from "../components/ResumePreview";
 import { pickHeadshot, savePdf } from "../lib/files";
-import { ACCENT_PRESETS, COLLECTION_FOR_SECTION, COLLECTIONS, PERSONAL_FIELDS, SECTION_LABELS, type CollectionItem, type CollectionKey, type FieldDef } from "./editorConfig";
+import { completion, isStepDone, STEPS, stepOrder, type StepKey } from "../lib/resumeMeta";
+import { ACCENT_PRESETS, COLLECTION_FOR_SECTION, COLLECTIONS, PERSONAL_FIELDS, type CollectionItem, type CollectionKey, type FieldDef } from "./editorConfig";
 
 type SaveState = "saved" | "dirty" | "saving" | "error";
+type Update = (next: (draft: ResumeData) => ResumeData) => void;
 const AUTOSAVE_DELAY_MS = 1200;
 const errorMessage = (error: unknown) => (error instanceof ApiError ? error.message : "Something went wrong. Please try again.");
 
+/** Guided, step-by-step resume editor — the website editor's sections as mobile steps. */
 export default function ResumeEditorPage() {
   const { id } = useParams<{ id: string }>();
   const resumeId = Number(id);
+  const router = useIonRouter();
   const [presentToast] = useIonToast();
   const [title, setTitle] = useState("");
   const [template, setTemplate] = useState<ResumeTemplateId>("modern");
   const [data, setData] = useState<ResumeData | null>(null);
-  const [tab, setTab] = useState<"edit" | "preview" | "design">("edit");
+  const [step, setStep] = useState<StepKey>("personal");
   const [saveState, setSaveState] = useState<SaveState>("saved");
-  const [downloading, setDownloading] = useState<ResumeTemplateId | null>(null);
+  const [sheet, setSheet] = useState<"" | "preview" | "style">("");
+  const [downloading, setDownloading] = useState(false);
   const [loadError, setLoadError] = useState("");
   const latest = useRef({ title, template, data });
   latest.current = { title, template, data };
   const saveTimer = useRef<number | undefined>(undefined);
+  const rail = useRef<HTMLDivElement>(null);
+  const content = useRef<HTMLIonContentElement>(null);
 
   const toast = useCallback((message: string, color: "success" | "danger" = "success") => presentToast({ message, duration: 2200, color, position: "top" }), [presentToast]);
 
@@ -61,156 +65,216 @@ export default function ResumeEditorPage() {
     window.clearTimeout(saveTimer.current);
     saveTimer.current = window.setTimeout(() => { void save(); }, AUTOSAVE_DELAY_MS);
   }, [save]);
-  useIonViewWillLeave(() => { if (saveState !== "saved") void save(); });
+  useIonViewWillEnter(() => document.body.classList.add("hide-tabs"));
+  useIonViewWillLeave(() => { document.body.classList.remove("hide-tabs"); if (saveState !== "saved") void save(); });
+  useEffect(() => () => document.body.classList.remove("hide-tabs"), []);
+  const updateData: Update = useCallback((next) => { setData((current) => (current ? next(current) : current)); change(); }, [change]);
 
-  const updateData = useCallback((next: (draft: ResumeData) => ResumeData) => { setData((current) => (current ? next(current) : current)); change(); }, [change]);
+  const steps = data ? stepOrder(data) : [];
+  const index = Math.max(0, steps.indexOf(step));
+  const progress = data ? completion(data) : 0;
 
-  const download = async (target: ResumeTemplateId) => {
-    setDownloading(target);
+  const goTo = (next: StepKey) => {
+    setStep(next);
+    void content.current?.scrollToTop(250);
+    requestAnimationFrame(() => rail.current?.querySelector(`[data-step="${next}"]`)?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }));
+  };
+
+  const download = async () => {
+    setDownloading(true);
     try {
       if (saveState !== "saved") await save();
-      await savePdf(await api.downloadPdf(resumeId, target === template ? undefined : target));
+      await savePdf(await api.downloadPdf(resumeId));
     } catch (error) {
       toast(errorMessage(error), "danger");
     } finally {
-      setDownloading(null);
+      setDownloading(false);
     }
   };
 
-  const status = { saved: { icon: cloudDoneOutline, text: "Saved" }, dirty: { icon: cloudDoneOutline, text: "Editing…" }, saving: { icon: cloudDoneOutline, text: "Saving…" }, error: { icon: cloudOfflineOutline, text: "Not saved — tap to retry" } }[saveState];
+  if (loadError || !data) {
+    return (
+      <IonPage>
+        <IonContent fullscreen><div className="center-state">{loadError ? <><p className="lede">{loadError}</p><button className="btn btn-secondary" onClick={() => router.push("/home", "back")}>Back to resumes</button></> : <LoaderCircle className="spin" size={26} />}</div></IonContent>
+      </IonPage>
+    );
+  }
+
+  const info = STEPS[step];
+  const nextStep = steps[index + 1];
+  const hidden = step !== "personal" && data.hiddenSections.includes(step);
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start"><IonBackButton defaultHref="/resumes" /></IonButtons>
-          <IonTitle>{title || "Resume"}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={() => download(template)} disabled={!data || !!downloading} aria-label="Download PDF">{downloading === template ? <IonSpinner name="crescent" /> : <IonIcon slot="icon-only" icon={downloadOutline} />}</IonButton>
-          </IonButtons>
-        </IonToolbar>
-        <IonToolbar>
-          <IonSegment value={tab} onIonChange={(event) => setTab(event.detail.value as typeof tab)}>
-            <IonSegmentButton value="edit"><IonLabel>Edit</IonLabel></IonSegmentButton>
-            <IonSegmentButton value="preview"><IonLabel>Preview</IonLabel></IonSegmentButton>
-            <IonSegmentButton value="design"><IonLabel>Design</IonLabel></IonSegmentButton>
-          </IonSegment>
-        </IonToolbar>
+      <IonHeader className="editor-header">
+        <div className="editor-bar">
+          <button className="icon-btn" onClick={() => (router.canGoBack() ? router.goBack() : router.push("/home", "back"))} aria-label="Back to resumes"><ArrowLeft size={19} /></button>
+          <div className="editor-bar-title">
+            <strong>{title || "Untitled resume"}</strong>
+            <SaveStatus state={saveState} onRetry={save} />
+          </div>
+          <button className="icon-btn" onClick={() => setSheet("style")} aria-label="Style and template"><Palette size={19} /></button>
+        </div>
+        <div className="step-rail" ref={rail}>
+          {steps.map((key, position) => {
+            const Icon = STEPS[key].icon;
+            return (
+              <button key={key} data-step={key} className={`step-chip ${key === step ? "active" : ""} ${key !== "personal" && data.hiddenSections.includes(key) ? "muted" : ""}`} onClick={() => goTo(key)} aria-current={key === step ? "step" : undefined}>
+                <span className="step-tile"><Icon size={17} strokeWidth={1.9} />{isStepDone(data, key) && <i><Check size={8} strokeWidth={3.6} /></i>}</span>
+                <span className="step-label">{position + 1}. {STEPS[key].label}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="editor-progress" aria-label={`${progress}% complete`}><i style={{ width: `${progress}%` }} /></div>
       </IonHeader>
-      <IonContent fullscreen>
-        {loadError ? <div className="center-state"><p>{loadError}</p></div> : !data ? <div className="center-state"><IonSpinner /></div> : (
-          <>
-            <button className={`save-status save-${saveState}`} onClick={() => saveState === "error" && save()} disabled={saveState !== "error"}><IonIcon icon={status.icon} />{status.text}</button>
-            {tab === "edit" && <EditTab title={title} setTitle={(value) => { setTitle(value); change(); }} data={data} updateData={updateData} toast={toast} />}
-            {tab === "preview" && <div className="preview-tab"><ResumePreview data={data} template={template} /></div>}
-            {tab === "design" && <DesignTab data={data} template={template} setTemplate={(next) => { setTemplate(next); change(); }} updateData={updateData} onDownload={download} downloading={downloading} />}
-          </>
-        )}
+
+      <IonContent ref={content} className="editor-content">
+        <section className="step-card" key={step}>
+          <div className="step-head">
+            <p className="eyebrow">{info.eyebrow} · Step {index + 1} of {steps.length}</p>
+            <h1 className="title">{info.title}</h1>
+            <p className="lede">{info.text}</p>
+          </div>
+
+          {step !== "personal" && (
+            <div className="section-options">
+              <button className={`chip ${hidden ? "" : "active"}`} onClick={() => updateData((draft) => ({ ...draft, hiddenSections: hidden ? draft.hiddenSections.filter((key) => key !== step) : [...draft.hiddenSections, step] }))}>
+                {hidden ? <EyeOff size={14} /> : <Eye size={14} />}{hidden ? "Hidden from resume" : "Shown on resume"}
+              </button>
+              <span className="section-move">
+                <button className="icon-btn plain" disabled={index <= 1} onClick={() => updateData((draft) => moveSection(draft, step, -1))} aria-label="Move section earlier"><ArrowUp size={17} /></button>
+                <button className="icon-btn plain" disabled={index === steps.length - 1} onClick={() => updateData((draft) => moveSection(draft, step, 1))} aria-label="Move section later"><ArrowDown size={17} /></button>
+              </span>
+            </div>
+          )}
+
+          <StepForm step={step} title={title} setTitle={(value) => { setTitle(value); change(); }} data={data} updateData={updateData} toast={toast} />
+        </section>
       </IonContent>
+
+      <IonFooter className="editor-footer">
+        <div className="editor-actions">
+          <button className="icon-btn" onClick={() => goTo(steps[index - 1])} disabled={index === 0} aria-label="Previous step"><ArrowLeft size={19} /></button>
+          <button className="btn btn-secondary" onClick={() => setSheet("preview")}><Eye size={18} />Preview</button>
+          {nextStep
+            ? <button className="btn btn-primary grow" onClick={() => goTo(nextStep)}>{STEPS[nextStep].label}<ArrowRight size={18} /></button>
+            : <button className="btn btn-primary grow" onClick={() => setSheet("preview")}>Finish<ArrowRight size={18} /></button>}
+        </div>
+      </IonFooter>
+
+      <PreviewModal isOpen={sheet === "preview"} onClose={() => setSheet("")} data={data} template={template} setTemplate={(next) => { setTemplate(next); change(); }} onDownload={download} downloading={downloading} progress={progress} />
+      <StyleSheet isOpen={sheet === "style"} onClose={() => setSheet("")} data={data} updateData={updateData} template={template} setTemplate={(next) => { setTemplate(next); change(); }} />
     </IonPage>
   );
 }
 
-// ---------------------------------------------------------------- Edit tab
+function moveSection(draft: ResumeData, section: StepKey, offset: -1 | 1): ResumeData {
+  const order = [...draft.sectionOrder];
+  const from = order.indexOf(section as ResumeData["sectionOrder"][number]);
+  const to = from + offset;
+  if (from < 0 || to < 0 || to >= order.length) return draft;
+  [order[from], order[to]] = [order[to], order[from]];
+  return { ...draft, sectionOrder: order };
+}
 
-function EditTab({ title, setTitle, data, updateData, toast }: { title: string; setTitle: (value: string) => void; data: ResumeData; updateData: (next: (draft: ResumeData) => ResumeData) => void; toast: (message: string, color?: "success" | "danger") => void }) {
-  const toggleHidden = (section: ResumeSectionKey) => updateData((draft) => ({ ...draft, hiddenSections: draft.hiddenSections.includes(section) ? draft.hiddenSections.filter((key) => key !== section) : [...draft.hiddenSections, section] }));
-  const move = (section: ResumeSectionKey, offset: -1 | 1) => updateData((draft) => {
-    const order = [...draft.sectionOrder];
-    const from = order.indexOf(section);
-    const to = from + offset;
-    if (from < 0 || to < 0 || to >= order.length) return draft;
-    [order[from], order[to]] = [order[to], order[from]];
-    return { ...draft, sectionOrder: order };
-  });
+function SaveStatus({ state, onRetry }: { state: SaveState; onRetry: () => void }) {
+  if (state === "error") return <button className="save-status error" onClick={onRetry}><CloudOff size={12} />Not saved · retry</button>;
+  return <span className={`save-status ${state}`}>{state === "saved" ? <><Check size={12} />Saved</> : <><LoaderCircle size={12} className="spin" />Saving</>}</span>;
+}
 
-  const [openSections, setOpenSections] = useState<string[]>(["personal"]);
+// ---------------------------------------------------------------- Step forms
 
+function StepForm({ step, title, setTitle, data, updateData, toast }: { step: StepKey; title: string; setTitle: (value: string) => void; data: ResumeData; updateData: Update; toast: (message: string, color?: "success" | "danger") => void }) {
+  if (step === "personal") {
+    return (
+      <div className="form-stack">
+        <PhotoPicker data={data} updateData={updateData} toast={toast} />
+        <div className="form-grid">
+          {PERSONAL_FIELDS.map((field) => (
+            <label key={field.key} className={`field ${field.half ? "half" : ""}`}>
+              <span>{field.label}</span>
+              <input type={field.type ?? "text"} inputMode={field.type === "email" ? "email" : field.type === "tel" ? "tel" : field.type === "url" ? "url" : undefined} autoCapitalize={field.type ? "none" : "words"} value={data[field.key]} onChange={(event) => updateData((draft) => ({ ...draft, [field.key]: event.target.value }))} />
+            </label>
+          ))}
+          <label className="field"><span>Resume name · only you see this</span><input value={title} onChange={(event) => setTitle(event.target.value)} /></label>
+        </div>
+      </div>
+    );
+  }
+  if (step === "summary") return <RichTextArea label="Summary" value={data.summary} onChange={(summary) => updateData((draft) => ({ ...draft, summary }))} placeholder="e.g. Full-stack engineer with 5 years building SaaS products. I turn complex workflows into fast, reliable tools." />;
+  if (step === "interests") {
+    return <label className="field"><span>Interests</span><input placeholder="Photography, hiking, open source" defaultValue={data.interests.join(", ")} onBlur={(event) => updateData((draft) => ({ ...draft, interests: event.target.value.split(",").map((item) => item.trim()).filter(Boolean) }))} /><small className="field-hint">Separate with commas.</small></label>;
+  }
+  const collection = COLLECTION_FOR_SECTION[step];
+  if (!collection) return null;
   return (
-    <div className="edit-tab">
-      <IonList inset className="field-card">
-        <IonItem><IonInput label="Resume name" labelPlacement="stacked" value={title} onIonInput={(event) => setTitle(event.detail.value ?? "")} /></IonItem>
-      </IonList>
-      <IonAccordionGroup multiple expand="inset" value={openSections} onIonChange={(event) => { if (event.target === event.currentTarget) setOpenSections(([] as string[]).concat(event.detail.value ?? [])); }}>
-        <IonAccordion value="personal">
-          <IonItem slot="header"><IonLabel>Personal details</IonLabel>{data.fullName && data.email && <IonIcon icon={checkmarkCircle} color="success" slot="end" />}</IonItem>
-          <div slot="content" className="accordion-body">
-            <PhotoPicker data={data} updateData={updateData} toast={toast} />
-            <div className="field-grid">
-              {PERSONAL_FIELDS.map((field) => (
-                <div key={field.key} className={field.half ? "half" : ""}>
-                  <IonInput className="boxed" label={field.label} labelPlacement="stacked" type={field.type ?? "text"} value={data[field.key]} onIonInput={(event) => updateData((draft) => ({ ...draft, [field.key]: event.detail.value ?? "" }))} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </IonAccordion>
-        {data.sectionOrder.map((section, index) => {
-          const hidden = data.hiddenSections.includes(section);
-          const collection = COLLECTION_FOR_SECTION[section];
-          return (
-            <IonAccordion key={section} value={section}>
-              <IonItem slot="header"><IonLabel className={hidden ? "section-hidden" : ""}>{SECTION_LABELS[section]}{hidden && <small> · hidden</small>}</IonLabel></IonItem>
-              <div slot="content" className="accordion-body">
-                <div className="section-tools">
-                  <IonButton size="small" fill="clear" onClick={() => toggleHidden(section)}><IonIcon slot="start" icon={hidden ? eyeOutline : eyeOffOutline} />{hidden ? "Show on resume" : "Hide from resume"}</IonButton>
-                  <span>
-                    <IonButton size="small" fill="clear" disabled={index === 0} onClick={() => move(section, -1)} aria-label={`Move ${SECTION_LABELS[section]} up`}><IonIcon slot="icon-only" icon={arrowUp} /></IonButton>
-                    <IonButton size="small" fill="clear" disabled={index === data.sectionOrder.length - 1} onClick={() => move(section, 1)} aria-label={`Move ${SECTION_LABELS[section]} down`}><IonIcon slot="icon-only" icon={arrowDown} /></IonButton>
-                  </span>
-                </div>
-                {section === "summary" && <RichTextArea label="Professional summary" value={data.summary} onChange={(summary) => updateData((draft) => ({ ...draft, summary }))} placeholder="2–4 sentences about your specialty and the impact you make." />}
-                {section === "interests" && <IonInput className="boxed" label="Interests (comma separated)" labelPlacement="stacked" value={data.interests.join(", ")} onIonChange={(event) => updateData((draft) => ({ ...draft, interests: (event.detail.value ?? "").split(",").map((item) => item.trim()).filter(Boolean) }))} />}
-                {collection && <CollectionEditor collection={collection} items={data[collection] as unknown as CollectionItem[]} onChange={(items) => updateData((draft) => ({ ...draft, [collection]: items }))} onReorder={collection === "experiences" ? () => updateData((draft) => ({ ...draft, theme: { ...draft.theme, experienceOrderMode: "manual" } })) : undefined} />}
-                {collection === "experiences" && data.theme.experienceOrderMode === "manual" && <IonButton size="small" fill="clear" onClick={() => updateData((draft) => ({ ...draft, theme: { ...draft.theme, experienceOrderMode: "auto" } }))}>Manual order · Sort by newest instead</IonButton>}
-              </div>
-            </IonAccordion>
-          );
-        })}
-      </IonAccordionGroup>
-    </div>
+    <>
+      <CollectionEditor
+        collection={collection}
+        items={data[collection] as unknown as CollectionItem[]}
+        onChange={(items) => updateData((draft) => ({ ...draft, [collection]: items }))}
+        onReorder={collection === "experiences" ? () => updateData((draft) => ({ ...draft, theme: { ...draft.theme, experienceOrderMode: "manual" } })) : undefined}
+      />
+      {collection === "experiences" && data.theme.experienceOrderMode === "manual" && (
+        <button className="link-btn order-reset" onClick={() => updateData((draft) => ({ ...draft, theme: { ...draft.theme, experienceOrderMode: "auto" } }))}>Manual order active · sort newest first</button>
+      )}
+    </>
   );
 }
 
-// Experiences are shown newest-first unless the user reorders them, which switches the resume to manual order (as on the website).
+// Experiences are shown newest-first unless the user reorders them, which switches to manual order (as on the website).
 function CollectionEditor({ collection, items, onChange, onReorder }: { collection: CollectionKey; items: CollectionItem[]; onChange: (items: CollectionItem[]) => void; onReorder?: () => void }) {
   const def = COLLECTIONS[collection];
+  const [openId, setOpenId] = useState<string | null>(items.length === 1 ? items[0].id : null);
   const update = (id: string, patch: Record<string, unknown>) => onChange(items.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   const move = (index: number, offset: -1 | 1) => { const next = [...items]; [next[index], next[index + offset]] = [next[index + offset], next[index]]; onChange(next); onReorder?.(); };
+  const add = () => { const item = def.create(); onChange([...items, item]); setOpenId(item.id); };
 
   return (
     <div className="collection">
-      {items.map((item, index) => (
-        <details key={item.id} className="collection-item" open={items.length === 1 || !def.itemTitle(item).startsWith("New")}>
-          <summary><strong>{def.itemTitle(item)}</strong></summary>
-          <div className="field-grid">
-            {def.fields.filter((field) => !(field.hiddenWhen && item[field.hiddenWhen])).map((field) => <Field key={field.key} field={field} value={item[field.key]} onChange={(value) => update(item.id, field.key === "current" && value ? { current: true, end: "" } : { [field.key]: value })} />)}
+      {items.map((item, index) => {
+        const open = openId === item.id;
+        return (
+          <div key={item.id} className={`entry ${open ? "open" : ""}`}>
+            <button className="entry-head" onClick={() => setOpenId(open ? null : item.id)} aria-expanded={open}>
+              <span className="entry-index">{index + 1}</span>
+              <span className="entry-title">{def.itemTitle(item)}</span>
+              <ChevronDown size={18} className="entry-chevron" />
+            </button>
+            {open && (
+              <div className="entry-body">
+                <div className="form-grid">
+                  {def.fields.filter((field) => !(field.hiddenWhen && item[field.hiddenWhen])).map((field) => <Field key={field.key} field={field} value={item[field.key]} onChange={(value) => update(item.id, field.key === "current" && value ? { current: true, end: "" } : { [field.key]: value })} />)}
+                </div>
+                <div className="entry-actions">
+                  <button className="icon-btn plain" disabled={index === 0} onClick={() => move(index, -1)} aria-label="Move up"><ArrowUp size={17} /></button>
+                  <button className="icon-btn plain" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label="Move down"><ArrowDown size={17} /></button>
+                  <button className="btn btn-danger btn-sm" onClick={() => onChange(items.filter((entry) => entry.id !== item.id))}><Trash2 size={15} />Remove</button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="collection-item-actions">
-            <IonButton size="small" fill="clear" disabled={index === 0} onClick={() => move(index, -1)} aria-label="Move up"><IonIcon slot="icon-only" icon={arrowUp} /></IonButton>
-            <IonButton size="small" fill="clear" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label="Move down"><IonIcon slot="icon-only" icon={arrowDown} /></IonButton>
-            <IonButton size="small" fill="clear" color="danger" onClick={() => onChange(items.filter((entry) => entry.id !== item.id))}><IonIcon slot="start" icon={trashOutline} />Remove</IonButton>
-          </div>
-        </details>
-      ))}
-      <IonButton expand="block" fill="outline" onClick={() => onChange([...items, def.create()])}><IonIcon slot="start" icon={addOutline} />{def.addLabel}</IonButton>
+        );
+      })}
+      <button className="add-entry" onClick={add}><Plus size={18} />{def.addLabel}</button>
     </div>
   );
 }
 
 function Field({ field, value, onChange }: { field: FieldDef; value: unknown; onChange: (value: unknown) => void }) {
-  const className = field.half ? "half" : "";
-  if (field.kind === "rich") return <div className={className}><RichTextArea label={field.label} value={typeof value === "string" ? value : ""} onChange={onChange} placeholder={field.placeholder} /></div>;
-  if (field.kind === "toggle") return <div className={className}><IonToggle checked={Boolean(value)} onIonChange={(event) => onChange(event.detail.checked)} labelPlacement="end">{field.label}</IonToggle></div>;
-  if (field.kind === "select") return <div className={className}><IonSelect className="boxed" label={field.label} labelPlacement="stacked" interface="popover" value={value} onIonChange={(event) => onChange(event.detail.value)}>{field.options?.map((option) => <IonSelectOption key={option} value={option}>{option}</IonSelectOption>)}</IonSelect></div>;
+  const className = `field ${field.half ? "half" : ""}`;
+  if (field.kind === "rich") return <div className={field.half ? "half" : ""}><RichTextArea label={field.label} value={typeof value === "string" ? value : ""} onChange={onChange} placeholder={field.placeholder} /></div>;
+  if (field.kind === "toggle") return <label className="switch-row"><span>{field.label}</span><IonToggle checked={Boolean(value)} onIonChange={(event) => onChange(event.detail.checked)} aria-label={field.label} /></label>;
+  if (field.kind === "select") return <label className={className}><span>{field.label}</span><select value={String(value ?? "")} onChange={(event) => onChange(event.target.value)}>{field.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
   if (field.kind === "lines") {
     const lines = Array.isArray(value) ? (value as string[]) : [];
-    return <div className={className}><label className="lines-field"><span>{field.label}</span><textarea rows={3} defaultValue={lines.join("\n")} onBlur={(event) => onChange(event.target.value.split("\n").map((line) => line.trim()).filter(Boolean))} /></label></div>;
+    return <label className={className}><span>{field.label}</span><textarea rows={3} defaultValue={lines.join("\n")} placeholder="Improved activation by 28%" onBlur={(event) => onChange(event.target.value.split("\n").map((line) => line.trim()).filter(Boolean))} /></label>;
   }
-  return <div className={className}><IonInput className="boxed" label={field.label} labelPlacement="stacked" placeholder={field.placeholder} value={typeof value === "string" ? value : ""} onIonInput={(event) => onChange(event.detail.value ?? "")} /></div>;
+  return <label className={className}><span>{field.label}</span><input placeholder={field.placeholder} value={typeof value === "string" ? value : ""} onChange={(event) => onChange(event.target.value)} /></label>;
 }
 
-function PhotoPicker({ data, updateData, toast }: { data: ResumeData; updateData: (next: (draft: ResumeData) => ResumeData) => void; toast: (message: string, color?: "success" | "danger") => void }) {
+function PhotoPicker({ data, updateData, toast }: { data: ResumeData; updateData: Update; toast: (message: string, color?: "success" | "danger") => void }) {
   const [busy, setBusy] = useState(false);
   const [library, setLibrary] = useState<Photo[] | null>(null);
   const setPhoto = (photoUrl: string) => updateData((draft) => ({ ...draft, photoUrl }));
@@ -220,8 +284,7 @@ function PhotoPicker({ data, updateData, toast }: { data: ResumeData; updateData
     try {
       const picked = await pickHeadshot();
       if (!picked) return;
-      const photo = await api.uploadPhoto(picked);
-      setPhoto(photo.storageUrl);
+      setPhoto((await api.uploadPhoto(picked)).storageUrl);
       toast("Headshot added");
     } catch (error) {
       toast(errorMessage(error), "danger");
@@ -229,67 +292,91 @@ function PhotoPicker({ data, updateData, toast }: { data: ResumeData; updateData
       setBusy(false);
     }
   };
-  const openLibrary = async () => {
-    try { setLibrary(await api.listPhotos()); } catch (error) { toast(errorMessage(error), "danger"); }
-  };
 
   return (
-    <div className="photo-picker">
-      <div className="photo-circle-preview">{data.photoUrl ? <img src={absoluteAssetUrl(data.photoUrl)} alt="Headshot" /> : <IonIcon icon={imageOutline} />}</div>
-      <div className="photo-actions">
-        <IonButton size="small" onClick={upload} disabled={busy}>{busy ? <IonSpinner name="crescent" /> : "Upload photo"}</IonButton>
-        <IonButton size="small" fill="outline" onClick={openLibrary}>Previous uploads</IonButton>
-        {data.photoUrl && <IonButton size="small" fill="clear" color="danger" onClick={() => setPhoto("")}>Remove</IonButton>}
-        <small>Shown on photo-friendly templates only.</small>
+    <div className="photo-card">
+      <div className="photo-avatar">{data.photoUrl ? <img src={absoluteAssetUrl(data.photoUrl)} alt="Your headshot" /> : <ImagePlus size={24} />}</div>
+      <div className="photo-copy">
+        <strong>Professional headshot <span className="pill rust">Optional</span></strong>
+        <small>Shown on photo-ready templates. Large photos are resized automatically.</small>
+        <div className="photo-buttons">
+          <button className="btn btn-secondary btn-sm" onClick={upload} disabled={busy}>{busy ? <LoaderCircle size={15} className="spin" /> : <ImagePlus size={15} />}{data.photoUrl ? "Replace" : "Add photo"}</button>
+          <button className="btn btn-ghost btn-sm" onClick={async () => { try { setLibrary(await api.listPhotos()); } catch (error) { toast(errorMessage(error), "danger"); } }}><Images size={15} />Library</button>
+          {data.photoUrl && <button className="icon-btn plain" onClick={() => setPhoto("")} aria-label="Remove photo"><Trash2 size={16} /></button>}
+        </div>
       </div>
-      <IonModal isOpen={library !== null} onDidDismiss={() => setLibrary(null)} initialBreakpoint={0.6} breakpoints={[0, 0.6, 0.95]}>
-        <IonContent className="ion-padding">
-          <h2 className="sheet-title">Your uploaded photos</h2>
-          {library?.length === 0 && <p>No uploads yet.</p>}
-          <div className="photo-library">
-            {library?.map((photo) => <button key={photo.id} onClick={() => { setPhoto(photo.storageUrl); setLibrary(null); }} aria-label={`Use ${photo.fileName}`}><img src={photo.url} alt="" /></button>)}
-          </div>
-        </IonContent>
+      <IonModal isOpen={library !== null} onDidDismiss={() => setLibrary(null)} className="sheet scroll-sheet" initialBreakpoint={0.6} breakpoints={[0, 0.6, 0.95]}>
+        <IonContent><div className="sheet-body">
+          <p className="eyebrow">Your uploads</p>
+          <h2 className="title">Choose a <em>headshot.</em></h2>
+          {library?.length === 0 && <p className="lede">No uploads yet — add one with “Add photo”.</p>}
+          <div className="photo-grid">{library?.map((photo) => <button key={photo.id} onClick={() => { setPhoto(photo.storageUrl); setLibrary(null); }} aria-label={`Use ${photo.fileName}`}><img src={photo.url} alt="" /></button>)}</div>
+        </div></IonContent>
       </IonModal>
     </div>
   );
 }
 
-// ---------------------------------------------------------------- Design tab
+// ---------------------------------------------------------------- Preview & style
 
-function DesignTab({ data, template, setTemplate, updateData, onDownload, downloading }: { data: ResumeData; template: ResumeTemplateId; setTemplate: (template: ResumeTemplateId) => void; updateData: (next: (draft: ResumeData) => ResumeData) => void; onDownload: (template: ResumeTemplateId) => void; downloading: ResumeTemplateId | null }) {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  useEffect(() => { api.templates().then(setTemplates).catch(() => setTemplates([])); }, []);
-  const theme = (patch: Partial<ResumeData["theme"]>) => updateData((draft) => ({ ...draft, theme: { ...draft.theme, ...patch } }));
-  const thumbnailData = useMemo(() => data, [data]);
-
+function TemplateStrip({ data, template, setTemplate }: { data: ResumeData; template: ResumeTemplateId; setTemplate: (template: ResumeTemplateId) => void }) {
   return (
-    <div className="design-tab">
-      <section className="design-group">
-        <h3>Accent colour</h3>
-        <div className="accent-row">
-          {ACCENT_PRESETS.map((color) => <button key={color} className={data.theme.accent.toLowerCase() === color.toLowerCase() ? "selected" : ""} style={{ background: color }} onClick={() => theme({ accent: color })} aria-label={`Accent ${color}`} />)}
-          <input type="color" value={data.theme.accent} onChange={(event) => theme({ accent: event.target.value })} aria-label="Custom accent colour" />
-        </div>
-      </section>
-      <section className="design-group design-options">
-        <IonSelect className="boxed" label="Typography" labelPlacement="stacked" interface="popover" value={data.theme.font} onIonChange={(event) => theme({ font: event.detail.value })}>{["modern", "serif", "classic"].map((font) => <IonSelectOption key={font} value={font}>{font[0].toUpperCase() + font.slice(1)}</IonSelectOption>)}</IonSelect>
-        <IonSelect className="boxed" label="Density" labelPlacement="stacked" interface="popover" value={data.theme.scale} onIonChange={(event) => theme({ scale: event.detail.value })}>{["compact", "comfortable", "airy"].map((scale) => <IonSelectOption key={scale} value={scale}>{scale[0].toUpperCase() + scale.slice(1)}</IonSelectOption>)}</IonSelect>
-        <IonSelect className="boxed" label="Photo shape" labelPlacement="stacked" interface="popover" value={data.theme.photoShape} onIonChange={(event) => theme({ photoShape: event.detail.value })}>{["circle", "rounded", "square"].map((shape) => <IonSelectOption key={shape} value={shape}>{shape[0].toUpperCase() + shape.slice(1)}</IonSelectOption>)}</IonSelect>
-        <IonToggle checked={data.theme.atsMode} onIonChange={(event) => theme({ atsMode: event.detail.checked })}>Plain ATS mode</IonToggle>
-      </section>
-      <h3 className="design-heading">Templates</h3>
-      <div className="template-grid">
-        {templates.map((item) => (
-          <article key={item.id} className={`template-tile ${item.id === template ? "active" : ""}`}>
-            <button className="template-tile-preview" onClick={() => setTemplate(item.id)} aria-pressed={item.id === template} aria-label={`Use ${item.name}`}><ResumePreview data={thumbnailData} template={item.id} firstPageOnly /></button>
-            <div className="template-tile-meta">
-              <div><strong>{item.name}</strong><span>{item.ats ? "ATS-friendly" : item.category}</span></div>
-              <IonButton fill="clear" size="small" onClick={() => onDownload(item.id)} disabled={!!downloading} aria-label={`Download as ${item.name}`}>{downloading === item.id ? <IonSpinner name="crescent" /> : <IonIcon slot="icon-only" icon={downloadOutline} />}</IonButton>
-            </div>
-          </article>
-        ))}
-      </div>
+    <div className="template-strip">
+      {RESUME_TEMPLATES.map((item) => (
+        <button key={item.id} className={`strip-item ${item.id === template ? "active" : ""}`} onClick={() => setTemplate(item.id)} aria-pressed={item.id === template} aria-label={`Use ${item.name}`}>
+          <div className="paper"><ResumePreview data={data} template={item.id} firstPageOnly /></div>
+          <span>{item.name}</span>
+        </button>
+      ))}
     </div>
+  );
+}
+
+function PreviewModal({ isOpen, onClose, data, template, setTemplate, onDownload, downloading, progress }: { isOpen: boolean; onClose: () => void; data: ResumeData; template: ResumeTemplateId; setTemplate: (template: ResumeTemplateId) => void; onDownload: () => void; downloading: boolean; progress: number }) {
+  const info = RESUME_TEMPLATES.find((item) => item.id === template);
+  return (
+    <IonModal isOpen={isOpen} onDidDismiss={onClose} className="fullscreen">
+      <div className="preview-shell">
+        <div className="preview-top">
+          <button className="icon-btn" onClick={onClose} aria-label="Close preview"><X size={19} /></button>
+          <div><strong>{info?.name}</strong><small>{info?.ats ? "ATS-friendly" : info?.category} · {progress}% complete</small></div>
+          <span className="spacer" />
+        </div>
+        <div className="preview-page"><div className="paper"><ResumePreview data={data} template={template} /></div></div>
+        <div className="preview-dock">
+          <TemplateStrip data={data} template={template} setTemplate={setTemplate} />
+          <button className="btn btn-primary btn-block" onClick={onDownload} disabled={downloading}>{downloading ? <LoaderCircle size={20} className="spin" /> : <Download size={19} />}{downloading ? "Preparing PDF…" : "Download PDF"}</button>
+        </div>
+      </div>
+    </IonModal>
+  );
+}
+
+function StyleSheet({ isOpen, onClose, data, updateData, template, setTemplate }: { isOpen: boolean; onClose: () => void; data: ResumeData; updateData: Update; template: ResumeTemplateId; setTemplate: (template: ResumeTemplateId) => void }) {
+  const theme = (patch: Partial<ResumeData["theme"]>) => updateData((draft) => ({ ...draft, theme: { ...draft.theme, ...patch } }));
+  const options = <T extends string>(values: readonly T[], current: T, onPick: (value: T) => void) => (
+    <div className="segmented">{values.map((value) => <button key={value} className={value === current ? "active" : ""} onClick={() => onPick(value)}>{value[0].toUpperCase() + value.slice(1)}</button>)}</div>
+  );
+  return (
+    <IonModal isOpen={isOpen} onDidDismiss={onClose} className="sheet scroll-sheet" initialBreakpoint={0.85} breakpoints={[0, 0.85, 1]}>
+      <IonContent><div className="sheet-body style-sheet">
+        <p className="eyebrow">Personalize</p>
+        <h2 className="title">Style & <em>layout.</em></h2>
+        <h3 className="style-label">Template</h3>
+        <TemplateStrip data={data} template={template} setTemplate={setTemplate} />
+        <h3 className="style-label">Accent colour</h3>
+        <div className="swatches">
+          {ACCENT_PRESETS.map((color) => <button key={color} className={data.theme.accent.toLowerCase() === color.toLowerCase() ? "active" : ""} style={{ background: color }} onClick={() => theme({ accent: color })} aria-label={`Accent ${color}`} />)}
+          <label className="swatch-custom" aria-label="Custom accent colour"><input type="color" value={data.theme.accent} onChange={(event) => theme({ accent: event.target.value })} /></label>
+        </div>
+        <h3 className="style-label">Typography</h3>
+        {options(["modern", "serif", "classic"] as const, data.theme.font, (font) => theme({ font }))}
+        <h3 className="style-label">Density</h3>
+        {options(["compact", "comfortable", "airy"] as const, data.theme.scale, (scale) => theme({ scale }))}
+        <h3 className="style-label">Photo shape</h3>
+        {options(["circle", "rounded", "square"] as const, data.theme.photoShape, (photoShape) => theme({ photoShape }))}
+        <label className="switch-row ats-row"><span>Plain ATS mode<small>Removes colour and photos for applicant tracking systems</small></span><IonToggle checked={data.theme.atsMode} onIonChange={(event) => theme({ atsMode: event.detail.checked })} aria-label="Plain ATS mode" /></label>
+      </div></IonContent>
+    </IonModal>
   );
 }

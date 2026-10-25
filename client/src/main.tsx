@@ -7,6 +7,7 @@ import { trpc } from "./lib/trpc";
 import "./index.css";
 import "./styles/polish.css";
 import "./styles/depth.css";
+import "./styles/white.css";
 
 // Analytics only loads when an endpoint is configured (it is not in local development).
 const analyticsEndpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT;

@@ -1,17 +1,18 @@
-import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSpinner, IonTitle, IonToolbar, useIonToast, useIonViewWillEnter } from "@ionic/react";
-import { cameraOutline, imagesOutline } from "ionicons/icons";
+import { IonContent, IonPage, IonRefresher, IonRefresherContent, useIonToast, useIonViewWillEnter } from "@ionic/react";
+import { Camera, ImagePlus, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { api, ApiError, type Photo } from "../api/client";
 import { pickHeadshot } from "../lib/files";
 
-/** Headshot library shared with the website. Choose one for a resume from its Personal details. */
+/** Headshot library shared with the website. Choose one for a resume in the editor's Personal step. */
 export default function PhotosPage() {
   const [presentToast] = useIonToast();
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [uploading, setUploading] = useState(false);
+  const toast = (message: string, color: "success" | "danger" = "success") => presentToast({ message, color, duration: 2200, position: "top" });
 
   const load = async () => {
-    try { setPhotos(await api.listPhotos()); } catch (error) { presentToast({ message: error instanceof ApiError ? error.message : "Could not load photos.", color: "danger", duration: 2200, position: "top" }); setPhotos((current) => current ?? []); }
+    try { setPhotos(await api.listPhotos()); } catch (error) { toast(error instanceof ApiError ? error.message : "Could not load photos.", "danger"); setPhotos((current) => current ?? []); }
   };
   useIonViewWillEnter(() => { void load(); });
 
@@ -22,9 +23,9 @@ export default function PhotosPage() {
       if (!picked) return;
       const photo = await api.uploadPhoto(picked);
       setPhotos((current) => [photo, ...(current ?? [])]);
-      presentToast({ message: "Photo uploaded", color: "success", duration: 1800, position: "top" });
+      toast("Photo uploaded");
     } catch (error) {
-      presentToast({ message: error instanceof ApiError ? error.message : "Upload failed. Please try again.", color: "danger", duration: 2400, position: "top" });
+      toast(error instanceof ApiError ? error.message : "Upload failed. Please try again.", "danger");
     } finally {
       setUploading(false);
     }
@@ -32,27 +33,28 @@ export default function PhotosPage() {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Photos</IonTitle>
-          <IonButtons slot="end"><IonButton onClick={upload} disabled={uploading} aria-label="Upload a photo">{uploading ? <IonSpinner name="crescent" /> : <IonIcon slot="icon-only" icon={cameraOutline} />}</IonButton></IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen className="ion-padding">
+      <IonContent fullscreen>
         <IonRefresher slot="fixed" onIonRefresh={async (event) => { await load(); event.detail.complete(); }}><IonRefresherContent /></IonRefresher>
-        {photos === null ? <div className="center-state"><IonSpinner /></div> : photos.length === 0 ? (
-          <div className="center-state empty-state">
-            <IonIcon icon={imagesOutline} />
-            <h2>No headshots yet</h2>
-            <p>Add a professional photo for templates that show one. Large photos are resized automatically.</p>
-            <IonButton onClick={upload} disabled={uploading}>Take or choose a photo</IonButton>
+        <div className="page-pad">
+          <div className="page-title-row">
+            <div><p className="eyebrow">Headshots</p><h1 className="display">Your <em>photos.</em></h1></div>
+            <button className="icon-btn" onClick={upload} disabled={uploading} aria-label="Add a photo">{uploading ? <LoaderCircle size={19} className="spin" /> : <Camera size={19} />}</button>
           </div>
-        ) : (
-          <>
-            <p className="muted">Pick one for a resume under Edit → Personal details.</p>
-            <div className="photo-library large">{photos.map((photo) => <figure key={photo.id}><img src={photo.url} alt={photo.fileName} /><figcaption>{new Date(photo.createdAt).toLocaleDateString()}</figcaption></figure>)}</div>
-          </>
-        )}
+          <p className="lede gallery-lede">A professional photo for templates that show one. Pick it for a resume in the editor's Personal step.</p>
+
+          {photos === null ? <div className="center-state"><LoaderCircle className="spin" size={26} /></div> : photos.length === 0 ? (
+            <button className="photo-empty" onClick={upload} disabled={uploading}>
+              <span className="qa-icon rust"><ImagePlus size={22} /></span>
+              <strong>Add your first headshot</strong>
+              <small>Take a photo or choose one from your library. It's resized automatically.</small>
+            </button>
+          ) : (
+            <div className="photo-grid large">
+              <button className="photo-add" onClick={upload} disabled={uploading} aria-label="Add a photo">{uploading ? <LoaderCircle className="spin" size={22} /> : <ImagePlus size={22} />}<span>Add</span></button>
+              {photos.map((photo) => <figure key={photo.id}><img src={photo.url} alt={photo.fileName} /><figcaption>{new Date(photo.createdAt).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</figcaption></figure>)}
+            </div>
+          )}
+        </div>
       </IonContent>
     </IonPage>
   );

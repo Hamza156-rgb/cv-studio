@@ -6,13 +6,16 @@ Ionic React + Capacitor app for iOS and Android. It talks to the same server and
 
 | Screen | Features | API used |
 |---|---|---|
-| Sign in / Create account | Email + password; stays signed in for 30 days and refreshes automatically | `/auth/login`, `/auth/signup`, `/auth/refresh`, `/auth/me` |
-| My resumes | List with live thumbnails, pull to refresh, create, import a PDF/DOCX, duplicate, delete, download PDF | `/resumes`, `/resumes/import`, `/resumes/{id}/duplicate`, `DELETE /resumes/{id}`, `/resumes/{id}/pdf` |
-| Editor › Edit | Every resume section, the same bold / italic / sub-heading / bullet formatting as the website, reorder or hide sections, headshot. Autosaves. | `GET`/`PATCH /resumes/{id}`, `/photos` |
-| Editor › Preview | The website's real template rendering | — |
-| Editor › Design | All 18 templates with thumbnails, accent colour, font, density, photo shape, ATS mode; download any template as PDF | `/templates`, `/resumes/{id}/pdf?template=` |
+| Welcome | Three-slide introduction using real template previews; shown on first launch | — |
+| Sign in / Create account | Email + password with show/hide; stays signed in for 30 days and refreshes automatically | `/auth/login`, `/auth/signup`, `/auth/refresh`, `/auth/me` |
+| Home | Greeting, "Continue editing" card with completion ring and next tip, quick actions, resume list with progress, download / duplicate / delete | `/resumes`, `/resumes/{id}/pdf`, `/resumes/{id}/duplicate`, `DELETE /resumes/{id}` |
+| New resume | "How would you like to begin?" (scratch, sample CV, import PDF/DOCX), then choose a template | `/resumes/import`, `POST /resumes` |
+| Editor | Guided steps matching the website (Personal → Summary → Experience → … ), bold/italic/sub-heading/bullet formatting, reorder or hide sections, headshot. Autosaves. | `GET`/`PATCH /resumes/{id}`, `/photos` |
+| Preview | Full-screen real template rendering, template switcher, Download PDF | `/resumes/{id}/pdf` |
+| Style & layout | Template, accent colour, font, density, photo shape, ATS mode | — |
+| Templates | Gallery of all 18 templates with filters and a detail sheet → start a resume | `/templates` data, `POST /resumes` |
 | Photos | Take or choose a headshot (resized automatically), see past uploads | `/photos` |
-| Account | Profile and sign out | `/auth/logout` |
+| Profile | Account details, stats, sign out | `/auth/logout` |
 
 ## Shared with the website
 
