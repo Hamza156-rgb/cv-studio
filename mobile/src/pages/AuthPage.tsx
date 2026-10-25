@@ -3,6 +3,7 @@ import { ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole } from "lucide-react"
 import { useState, type FormEvent } from "react";
 import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { ServerSettings } from "../components/ServerSettings";
 
 const COPY = {
   login: { eyebrow: "Welcome back", title: <>Sign in to <em>continue.</em></>, text: "Pick up where you left off — your resumes are synced with the website.", action: "Sign in", switchText: "New to CV Studio?", switchAction: "Create an account", switchTo: "/signup" },
@@ -66,6 +67,7 @@ export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
           </form>
           <p className="auth-switch">{copy.switchText} <button className="link-btn" onClick={() => { setError(""); router.push(copy.switchTo, "none", "replace"); }}>{copy.switchAction}</button></p>
           <p className="auth-secure"><LockKeyhole size={13} />One secure account for the app and the website</p>
+          <div className="server-row"><ServerSettings /></div>
         </div>
       </IonContent>
     </IonPage>

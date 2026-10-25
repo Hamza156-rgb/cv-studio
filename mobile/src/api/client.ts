@@ -2,8 +2,30 @@ import type { RESUME_TEMPLATES, ResumeData, ResumeTemplateId } from "@shared/res
 
 /** Typed client for every endpoint of the CV Studio REST API (/api/v1). See docs/MOBILE_API.md. */
 
-export const API_ORIGIN = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/+$/, "") || "http://localhost:3000";
-const API_BASE = `${API_ORIGIN}/api/v1`;
+const SERVER_KEY = "cv-studio.server";
+const clean = (url: string) => url.trim().replace(/\/+$/, "");
+/** Server baked in at build time (VITE_API_URL); the user can override it from the sign-in screen. */
+export const DEFAULT_API_ORIGIN = clean((import.meta.env.VITE_API_URL as string | undefined) ?? "") || "http://localhost:3000";
+const storedOrigin = () => { try { return localStorage.getItem(SERVER_KEY); } catch { return null; } };
+export let API_ORIGIN = storedOrigin() || DEFAULT_API_ORIGIN;
+const apiBase = () => `${API_ORIGIN}/api/v1`;
+
+/** Points the app at another CV Studio server (pass null to go back to the default). */
+export function setApiOrigin(url: string | null) {
+  API_ORIGIN = url ? clean(url) : DEFAULT_API_ORIGIN;
+  try { if (url) localStorage.setItem(SERVER_KEY, API_ORIGIN); else localStorage.removeItem(SERVER_KEY); } catch { /* storage unavailable */ }
+}
+
+/** Checks that a server actually runs the CV Studio API (not just the website). */
+export async function checkServer(url: string) {
+  try {
+    const response = await fetch(`${clean(url)}/api/v1`, { headers: { Accept: "application/json" } });
+    const body = await response.json().catch(() => null) as { name?: string } | null;
+    return body?.name === "CV Studio API" ? "ok" as const : "no-api" as const;
+  } catch {
+    return "unreachable" as const;
+  }
+}
 
 export type User = { id: number; name: string | null; email: string | null; createdAt: string };
 export type Session = { token: string; tokenType: "Bearer"; expiresAt: string; user: User };
@@ -30,13 +52,15 @@ export function setUnauthorizedHandler(handler: (() => void) | null) { onUnautho
 async function send(path: string, init: RequestInit = {}): Promise<Response> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {
+    response = await fetch(`${apiBase()}${path}`, {
       ...init,
       headers: { ...(init.body ? { "Content-Type": "application/json" } : {}), ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}), ...init.headers },
     });
   } catch {
     throw new ApiError(0, "NETWORK", "Can't reach CV Studio. Check your connection and try again.");
   }
+  // A server without the API answers with the website's HTML page instead of JSON.
+  if (response.ok && (response.headers.get("Content-Type") ?? "").includes("text/html")) throw new ApiError(response.status, "NO_API", "This server doesn't have the CV Studio app API yet. Redeploy the latest code, or change the server on the sign-in screen.");
   if (response.ok) return response;
   const body = await response.json().catch(() => null) as { error?: { code?: string; message?: string; details?: { path: string; message: string }[] } } | null;
   if (response.status === 401 && authToken) onUnauthorized?.();

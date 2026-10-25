@@ -486,3 +486,10 @@ body.hide-tabs ion-tab-bar { display: none; }
 .app-bar-actions { align-items: center; display: flex; gap: 6px; justify-content: flex-end; }
 .avatar-btn.small { border-width: 2px; font-size: 12.5px; height: 38px; width: 38px; }
 .page-pad { padding-top: 14px; }
+
+/* Server picker (sign-in screen) */
+.server-row { display: flex; justify-content: center; margin-top: 10px; }
+.server-chip { align-items: center; background: #f2f5f4; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); display: inline-flex; font-size: 12px; gap: 6px; max-width: 100%; overflow: hidden; padding: 6px 12px; text-overflow: ellipsis; white-space: nowrap; }
+.server-presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.server-save { margin-top: 16px; }
+.sheet-body .auth-error { margin-top: 12px; }
