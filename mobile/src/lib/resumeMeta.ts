@@ -48,9 +48,13 @@ export function nextTips(data: ResumeData) {
   return tips;
 }
 
+/** Time-of-day greeting; late night (10 pm – 5 am) gets its own line instead of "Good morning". */
 export function greeting(date = new Date()) {
   const hour = date.getHours();
-  return hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  if (hour >= 5 && hour < 12) return "Good morning";
+  if (hour >= 12 && hour < 17) return "Good afternoon";
+  if (hour >= 17 && hour < 22) return "Good evening";
+  return "Working late";
 }
 
 export function relativeTime(value: string) {

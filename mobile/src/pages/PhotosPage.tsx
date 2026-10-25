@@ -2,6 +2,7 @@ import { IonContent, IonPage, IonRefresher, IonRefresherContent, useIonToast, us
 import { Camera, ImagePlus, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { api, ApiError, type Photo } from "../api/client";
+import { AppHeader, onScroll } from "../components/AppHeader";
 import { pickHeadshot } from "../lib/files";
 
 /** Headshot library shared with the website. Choose one for a resume in the editor's Personal step. */
@@ -9,6 +10,7 @@ export default function PhotosPage() {
   const [presentToast] = useIonToast();
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [condensed, setCondensed] = useState(false);
   const toast = (message: string, color: "success" | "danger" = "success") => presentToast({ message, color, duration: 2200, position: "top" });
 
   const load = async () => {
@@ -33,13 +35,12 @@ export default function PhotosPage() {
 
   return (
     <IonPage>
-      <IonContent fullscreen>
+      <AppHeader title="Photos" condensed={condensed} actions={<button className="icon-btn" onClick={upload} disabled={uploading} aria-label="Add a photo">{uploading ? <LoaderCircle size={19} className="spin" /> : <Camera size={19} />}</button>} />
+      <IonContent scrollEvents onIonScroll={onScroll(setCondensed)}>
         <IonRefresher slot="fixed" onIonRefresh={async (event) => { await load(); event.detail.complete(); }}><IonRefresherContent /></IonRefresher>
         <div className="page-pad">
-          <div className="page-title-row">
-            <div><p className="eyebrow">Headshots</p><h1 className="display">Your <em>photos.</em></h1></div>
-            <button className="icon-btn" onClick={upload} disabled={uploading} aria-label="Add a photo">{uploading ? <LoaderCircle size={19} className="spin" /> : <Camera size={19} />}</button>
-          </div>
+          <p className="eyebrow">Headshots</p>
+          <h1 className="display">Your <em>photos.</em></h1>
           <p className="lede gallery-lede">A professional photo for templates that show one. Pick it for a resume in the editor's Personal step.</p>
 
           {photos === null ? <div className="center-state"><LoaderCircle className="spin" size={26} /></div> : photos.length === 0 ? (

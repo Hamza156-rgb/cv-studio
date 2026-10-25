@@ -43,7 +43,7 @@ function Routes() {
 
   if (status === "loading" || onboarded === null) return <div className="splash"><span className="brand-mark">cv</span></div>;
   return (
-    <IonReactRouter>
+    <IonReactRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       {status === "signedIn" ? <SignedInApp /> : (
         <IonRouterOutlet>
           <Route path="/welcome" element={<OnboardingPage />} />

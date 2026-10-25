@@ -4,6 +4,7 @@ import { ArrowRight, FileUp, LayoutTemplate, LoaderCircle, MoreHorizontal, Plus,
 import { useMemo, useState } from "react";
 import { api, ApiError, type Resume } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { AppHeader, onScroll } from "../components/AppHeader";
 import { NewResumeSheet } from "../components/NewResumeSheet";
 import { ProgressRing } from "../components/ProgressRing";
 import { ResumePreview } from "../components/ResumePreview";
@@ -34,6 +35,8 @@ export default function HomePage() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
   const [showAll, setShowAll] = useState(false);
+  const [condensed, setCondensed] = useState(false);
+  const initials = (user?.name ?? user?.email ?? "?").split(/\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
   const firstName = (user?.name ?? "").trim().split(/\s+/)[0];
 
   const toast = (message: string, color: "success" | "danger" = "success") => presentToast({ message, duration: 2200, color, position: "top" });
@@ -65,7 +68,11 @@ export default function HomePage() {
 
   return (
     <IonPage>
-      <IonContent fullscreen>
+      <AppHeader title="Home" condensed={condensed} actions={<>
+        <button className="icon-btn plain" onClick={() => setCreating(true)} aria-label="New resume"><Plus size={20} /></button>
+        <button className="avatar-btn small" onClick={() => router.push("/profile")} aria-label="Your profile">{initials}</button>
+      </>} />
+      <IonContent scrollEvents onIonScroll={onScroll(setCondensed)}>
         <IonRefresher slot="fixed" onIonRefresh={async (event) => { await load(); event.detail.complete(); }}><IonRefresherContent /></IonRefresher>
         <div className="page-pad home">
           <header className="home-head">
@@ -73,7 +80,6 @@ export default function HomePage() {
               <p className="caption">{greeting()}{firstName ? "," : ""}</p>
               <h1 className="display">{firstName ? <>{firstName}<em>.</em></> : <>Welcome<em>.</em></>}</h1>
             </div>
-            <button className="avatar-btn" onClick={() => router.push("/profile")} aria-label="Your profile">{(user?.name ?? user?.email ?? "?").split(/\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase()}</button>
           </header>
 
           {resumes === null ? <div className="center-state"><LoaderCircle className="spin" size={26} /></div> : latest ? (

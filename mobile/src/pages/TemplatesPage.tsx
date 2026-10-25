@@ -2,6 +2,7 @@ import { IonContent, IonModal, IonPage } from "@ionic/react";
 import { RESUME_TEMPLATES, sampleResumeData, type ResumeTemplateId } from "@shared/resume";
 import { ArrowRight, Camera, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
+import { AppHeader, onScroll } from "../components/AppHeader";
 import { NewResumeSheet } from "../components/NewResumeSheet";
 import { ResumePreview } from "../components/ResumePreview";
 import { Tilt } from "../components/Tilt";
@@ -14,12 +15,14 @@ export default function TemplatesPage() {
   const [filter, setFilter] = useState("All");
   const [selected, setSelected] = useState<Template | null>(null);
   const [startWith, setStartWith] = useState<ResumeTemplateId | null>(null);
+  const [condensed, setCondensed] = useState(false);
   const samples = useMemo(() => Object.fromEntries(RESUME_TEMPLATES.map((item) => [item.id, sampleResumeData(item.id)])), []);
   const items = RESUME_TEMPLATES.filter((item) => filter === "All" || (filter === "ATS-friendly" ? item.ats : filter === "Photo" ? item.supportsPhoto : item.category === filter));
 
   return (
     <IonPage>
-      <IonContent fullscreen>
+      <AppHeader title="Templates" condensed={condensed} actions={<span className="pill">{RESUME_TEMPLATES.length} layouts</span>} />
+      <IonContent scrollEvents onIonScroll={onScroll(setCondensed)}>
         <div className="page-pad">
           <p className="eyebrow">Template library</p>
           <h1 className="display">Find the layout that <em>fits you.</em></h1>

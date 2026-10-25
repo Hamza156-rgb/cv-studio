@@ -2,11 +2,13 @@ import { IonContent, IonPage, useIonAlert, useIonViewWillEnter } from "@ionic/re
 import { CalendarDays, ChevronRight, Globe, LogOut, Mail, Server } from "lucide-react";
 import { useState } from "react";
 import { api, API_ORIGIN } from "../api/client";
+import { AppHeader, onScroll } from "../components/AppHeader";
 import { useAuth } from "../auth/AuthContext";
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const [presentAlert] = useIonAlert();
+  const [condensed, setCondensed] = useState(false);
   const [stats, setStats] = useState<{ resumes: number; photos: number } | null>(null);
   const initials = (user?.name ?? user?.email ?? "?").split(/\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
 
@@ -18,7 +20,8 @@ export default function ProfilePage() {
 
   return (
     <IonPage>
-      <IonContent fullscreen>
+      <AppHeader title="Profile" condensed={condensed} actions={<button className="icon-btn plain" onClick={confirmLogout} aria-label="Sign out"><LogOut size={19} /></button>} />
+      <IonContent scrollEvents onIonScroll={onScroll(setCondensed)}>
         <div className="page-pad">
           <p className="eyebrow">Profile</p>
           <div className="profile-card">
