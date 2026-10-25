@@ -52,3 +52,8 @@ html, body { background: #fff; }
 .dashboard-more { align-items: center; display: flex; flex-direction: column; gap: 8px; margin-top: 32px; }
 .dashboard-more span { color: var(--muted-ink); font-size: 12.5px; }
 @media (max-width: 680px) { .dashboard-toolbar { flex-wrap: wrap; } .dashboard-toolbar-right { justify-content: space-between; width: 100%; } }
+
+/* In-page links land below the sticky navigation bar. */
+#how-it-works, #faq { scroll-margin-top: 92px; }
+/* "Edit with a clear view" band: neutral instead of the old sand, so it sits on the white theme. */
+section.editor-teaser { background: linear-gradient(180deg, #f3f6f5, #e9eeec); }
