@@ -1,5 +1,5 @@
 import { IonContent, IonPage, useIonAlert, useIonViewWillEnter } from "@ionic/react";
-import { CalendarDays, ChevronRight, Globe, LogOut, Mail, Server } from "lucide-react";
+import { CalendarDays, ChevronRight, Globe, LogOut, Mail } from "lucide-react";
 import { useState } from "react";
 import { api, API_ORIGIN } from "../api/client";
 import { AppHeader, onScroll } from "../components/AppHeader";
@@ -40,7 +40,6 @@ export default function ProfilePage() {
             <div className="settings-row"><span className="qa-icon mint"><Mail size={17} /></span><div><strong>Email</strong><small>{user?.email}</small></div></div>
             <div className="settings-row"><span className="qa-icon mint"><CalendarDays size={17} /></span><div><strong>Member since</strong><small>{user ? new Date(user.createdAt).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : "—"}</small></div></div>
             <a className="settings-row" href={API_ORIGIN} target="_blank" rel="noreferrer"><span className="qa-icon mint"><Globe size={17} /></span><div><strong>Open the website</strong><small>Same account, same resumes</small></div><ChevronRight size={18} className="settings-chevron" /></a>
-            <div className="settings-row"><span className="qa-icon mint"><Server size={17} /></span><div><strong>Server</strong><small>{API_ORIGIN.replace(/^https?:\/\//, "")}</small></div></div>
           </div>
 
           <button className="btn btn-danger btn-block profile-logout" onClick={confirmLogout}><LogOut size={18} />Sign out</button>

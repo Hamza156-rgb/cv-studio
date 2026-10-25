@@ -493,3 +493,26 @@ body.hide-tabs ion-tab-bar { display: none; }
 .server-presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
 .server-save { margin-top: 16px; }
 .sheet-body .auth-error { margin-top: 12px; }
+
+/* Onboarding layout: top bar, artwork that flexes to the free space, copy in normal flow.
+   Works on short phones and with Android's larger system font sizes. */
+.onboarding-shell { display: flex; flex-direction: column; height: 100%; }
+.onboarding-shell .onboarding-top { flex: 0 0 auto; }
+.onboarding-shell .onboarding-track { flex: 1 1 auto; height: auto; min-height: 0; }
+.onboarding-shell .art-tilt, .onboarding-shell .art { max-height: 100%; }
+.onboarding-shell .onboarding-copy { flex: 0 0 auto; padding-top: 8px; position: static; }
+.onboarding-shell .onboarding-title { font-size: clamp(28px, 8.4vw, 36px); min-height: 0; }
+.onboarding-shell .onboarding-text { font-size: 15px; min-height: 0; }
+.onboarding-shell .art-fan .fan-card { top: 6%; }
+.onboarding-shell .art-wall { padding: 2% 7%; }
+@media (max-height: 700px) {
+  .onboarding-shell .onboarding-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .onboarding-shell .dots { margin-bottom: 14px; }
+}
+/* Size the artwork from the space the track actually has (container query units). */
+.onboarding-shell .onboarding-track { container-type: size; overflow-y: hidden; }
+.onboarding-shell .art-tilt { height: auto; max-height: none; width: min(420px, 100cqw, 128cqh); }
+.onboarding-shell .art-fan { aspect-ratio: 1 / .82; height: auto; }
+.onboarding-shell .art-wall { margin: 0 auto; width: min(100%, 96cqh); }
+.onboarding-shell .art-sync { aspect-ratio: 1 / .82; height: auto; }
+.onboarding-shell .sync-card { width: 50%; }

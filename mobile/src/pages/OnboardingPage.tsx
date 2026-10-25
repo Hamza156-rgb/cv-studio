@@ -26,6 +26,7 @@ export default function OnboardingPage() {
   return (
     <IonPage>
       <IonContent fullscreen scrollY={false} className="onboarding">
+        <div className="onboarding-shell">
         <div className="onboarding-top">
           <div className="brand-row light"><span className="brand-mark light">cv</span><strong>CV Studio</strong></div>
           {!last && <button className="link-light" onClick={() => go(SLIDES.length - 1)}>Skip</button>}
@@ -66,6 +67,7 @@ export default function OnboardingPage() {
             {last ? "Create your free account" : "Continue"}<ArrowRight size={18} />
           </button>
           <button className="btn btn-ghost-light btn-block" onClick={() => finish("/login")}>I already have an account</button>
+        </div>
         </div>
       </IonContent>
     </IonPage>

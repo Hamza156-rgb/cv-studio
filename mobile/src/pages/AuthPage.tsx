@@ -1,6 +1,6 @@
 import { IonContent, IonPage, useIonRouter } from "@ionic/react";
 import { ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { ServerSettings } from "../components/ServerSettings";
@@ -20,6 +20,11 @@ export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const copy = COPY[mode];
+  // Developer option: long-press the logo to show the server picker (hidden from normal users).
+  const [showServer, setShowServer] = useState(false);
+  const pressTimer = useRef<number | undefined>(undefined);
+  const startPress = () => { pressTimer.current = window.setTimeout(() => setShowServer(true), 1200); };
+  const endPress = () => window.clearTimeout(pressTimer.current);
   const passwordTooShort = mode === "signup" && password.length > 0 && password.length < 8;
   const ready = Boolean(email && password && (mode === "login" || (name.trim() && password.length >= 8)));
 
@@ -44,7 +49,7 @@ export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
         <div className="auth-wrap">
           <button className="icon-btn" onClick={() => router.push("/welcome", "back", "replace")} aria-label="Back to welcome"><ArrowLeft size={19} /></button>
           <div className="auth-head">
-            <span className="brand-mark">cv</span>
+            <span className="brand-mark" onPointerDown={startPress} onPointerUp={endPress} onPointerLeave={endPress} onContextMenu={(event) => event.preventDefault()}>cv</span>
             <p className="eyebrow">{copy.eyebrow}</p>
             <h1 className="display">{copy.title}</h1>
             <p className="lede">{copy.text}</p>
@@ -67,7 +72,7 @@ export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
           </form>
           <p className="auth-switch">{copy.switchText} <button className="link-btn" onClick={() => { setError(""); router.push(copy.switchTo, "none", "replace"); }}>{copy.switchAction}</button></p>
           <p className="auth-secure"><LockKeyhole size={13} />One secure account for the app and the website</p>
-          <div className="server-row"><ServerSettings /></div>
+          {showServer && <div className="server-row"><ServerSettings /></div>}
         </div>
       </IonContent>
     </IonPage>
