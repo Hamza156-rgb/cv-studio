@@ -161,7 +161,8 @@ function EditTab({ title, setTitle, data, updateData, toast }: { title: string; 
                 </div>
                 {section === "summary" && <RichTextArea label="Professional summary" value={data.summary} onChange={(summary) => updateData((draft) => ({ ...draft, summary }))} placeholder="2–4 sentences about your specialty and the impact you make." />}
                 {section === "interests" && <IonInput className="boxed" label="Interests (comma separated)" labelPlacement="stacked" value={data.interests.join(", ")} onIonChange={(event) => updateData((draft) => ({ ...draft, interests: (event.detail.value ?? "").split(",").map((item) => item.trim()).filter(Boolean) }))} />}
-                {collection && <CollectionEditor collection={collection} items={data[collection] as unknown as CollectionItem[]} onChange={(items) => updateData((draft) => ({ ...draft, [collection]: items }))} />}
+                {collection && <CollectionEditor collection={collection} items={data[collection] as unknown as CollectionItem[]} onChange={(items) => updateData((draft) => ({ ...draft, [collection]: items }))} onReorder={collection === "experiences" ? () => updateData((draft) => ({ ...draft, theme: { ...draft.theme, experienceOrderMode: "manual" } })) : undefined} />}
+                {collection === "experiences" && data.theme.experienceOrderMode === "manual" && <IonButton size="small" fill="clear" onClick={() => updateData((draft) => ({ ...draft, theme: { ...draft.theme, experienceOrderMode: "auto" } }))}>Manual order · Sort by newest instead</IonButton>}
               </div>
             </IonAccordion>
           );
@@ -171,10 +172,11 @@ function EditTab({ title, setTitle, data, updateData, toast }: { title: string; 
   );
 }
 
-function CollectionEditor({ collection, items, onChange }: { collection: CollectionKey; items: CollectionItem[]; onChange: (items: CollectionItem[]) => void }) {
+// Experiences are shown newest-first unless the user reorders them, which switches the resume to manual order (as on the website).
+function CollectionEditor({ collection, items, onChange, onReorder }: { collection: CollectionKey; items: CollectionItem[]; onChange: (items: CollectionItem[]) => void; onReorder?: () => void }) {
   const def = COLLECTIONS[collection];
   const update = (id: string, patch: Record<string, unknown>) => onChange(items.map((item) => (item.id === id ? { ...item, ...patch } : item)));
-  const move = (index: number, offset: -1 | 1) => { const next = [...items]; [next[index], next[index + offset]] = [next[index + offset], next[index]]; onChange(next); };
+  const move = (index: number, offset: -1 | 1) => { const next = [...items]; [next[index], next[index + offset]] = [next[index + offset], next[index]]; onChange(next); onReorder?.(); };
 
   return (
     <div className="collection">
