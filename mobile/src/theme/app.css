@@ -456,3 +456,18 @@ body.hide-tabs ion-tab-bar { display: none; }
   .fan-card .paper, .sync-card, .float-badge, .art-wall, .step-card { animation: none !important; }
   .tilt-inner { transform: none !important; }
 }
+
+/* Long resume lists */
+.preview-placeholder { animation: lazy-shimmer 1.4s ease-in-out infinite; background: linear-gradient(100deg, #f1f3f2 30%, #f8f9f9 50%, #f1f3f2 70%); background-size: 300% 100%; inset: 0; position: absolute; }
+@keyframes lazy-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.list-tools { display: grid; gap: 10px; margin-bottom: 14px; }
+.list-tools .scroll-row { margin-bottom: -4px; }
+.search-field { align-items: center; background: #fff; border: 1px solid var(--line-strong); border-radius: 14px; color: var(--subtle); display: flex; gap: 8px; padding: 0 6px 0 13px; }
+.search-field:focus-within { border-color: var(--ink); box-shadow: 0 0 0 4px rgba(23,56,58,.1); }
+.search-field input { -webkit-appearance: none; appearance: none; background: transparent; border: 0; color: var(--ink-900); flex: 1; font: 16px var(--sans); min-height: 48px; min-width: 0; outline: none; }
+.search-field input::-webkit-search-cancel-button { display: none; }
+.search-field button { align-items: center; background: #eef1f0; border: 0; border-radius: 50%; color: var(--ink-soft); display: flex; height: 28px; justify-content: center; width: 28px; }
+.list-empty { padding: 18px 4px; text-align: center; }
+.list-empty p { color: var(--muted); margin: 0 0 4px; }
+.show-all { margin-top: 14px; }
+.resume-row-copy strong { -webkit-box-orient: vertical; -webkit-line-clamp: 2; display: -webkit-box; overflow: hidden; }

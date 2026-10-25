@@ -35,3 +35,20 @@ html, body { background: #fff; }
 .template-compare-card { background: #fff; border-color: var(--line); }
 .template-compare-preview { background: var(--stage); }
 
+
+/* Dashboard uses the full width beside the sidebar instead of a centred 1200px column. */
+.dashboard-main .dashboard-content { margin: 0; max-width: none; padding: 48px clamp(24px, 4vw, 64px) 72px; }
+.dashboard-main .resume-card-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.dashboard-main .dashboard-title { flex-wrap: wrap; gap: 20px; }
+@media (max-width: 800px) { .dashboard-main .dashboard-content { padding: 32px 20px 56px; } }
+
+/* Dashboard at scale: sort control, lazy thumbnails, "show more". */
+.dashboard-toolbar-right { align-items: center; display: flex; gap: 10px; }
+.dashboard-sort { -webkit-appearance: none; appearance: none; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23566d6d' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); cursor: pointer; font: inherit; font-size: 13px; height: 34px; padding: 0 32px 0 14px; }
+.lazy-thumbnail, .lazy-thumbnail > .lazy-placeholder { height: 100%; width: 100%; }
+.lazy-placeholder { background: linear-gradient(100deg, #f1f3f2 30%, #f8f9f9 50%, #f1f3f2 70%); background-size: 300% 100%; animation: lazy-shimmer 1.4s ease-in-out infinite; border-radius: 4px; min-height: 200px; }
+@keyframes lazy-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.resume-card-body h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dashboard-more { align-items: center; display: flex; flex-direction: column; gap: 8px; margin-top: 32px; }
+.dashboard-more span { color: var(--muted-ink); font-size: 12.5px; }
+@media (max-width: 680px) { .dashboard-toolbar { flex-wrap: wrap; } .dashboard-toolbar-right { justify-content: space-between; width: 100%; } }

@@ -1,7 +1,7 @@
 import { IonActionSheet, IonContent, IonPage, IonRefresher, IonRefresherContent, useIonAlert, useIonRouter, useIonToast, useIonViewWillEnter } from "@ionic/react";
 import { RESUME_TEMPLATES } from "@shared/resume";
-import { ArrowRight, FileUp, LayoutTemplate, LoaderCircle, MoreHorizontal, Plus } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, FileUp, LayoutTemplate, LoaderCircle, MoreHorizontal, Plus, Search, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { api, ApiError, type Resume } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { NewResumeSheet } from "../components/NewResumeSheet";
@@ -12,6 +12,15 @@ import { savePdf } from "../lib/files";
 import { completion, greeting, nextTips, relativeTime } from "../lib/resumeMeta";
 
 const templateName = (id: string) => RESUME_TEMPLATES.find((item) => item.id === id)?.name ?? id;
+type SortKey = "recent" | "name" | "progress";
+const SORTS: { key: SortKey; label: string; compare: (a: Resume, b: Resume) => number }[] = [
+  { key: "recent", label: "Recent", compare: (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime() },
+  { key: "name", label: "Name", compare: (a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base", numeric: true }) },
+  { key: "progress", label: "Least complete", compare: (a, b) => completion(a.data) - completion(b.data) },
+];
+// Search and sort appear once the list is long enough to need them.
+const TOOLS_FROM = 4;
+const COLLAPSED_COUNT = 6;
 
 export default function HomePage() {
   const router = useIonRouter();
@@ -22,6 +31,9 @@ export default function HomePage() {
   const [menuFor, setMenuFor] = useState<Resume | null>(null);
   const [creating, setCreating] = useState(false);
   const [busy, setBusy] = useState("");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("recent");
+  const [showAll, setShowAll] = useState(false);
   const firstName = (user?.name ?? "").trim().split(/\s+/)[0];
 
   const toast = (message: string, color: "success" | "danger" = "success") => presentToast({ message, duration: 2200, color, position: "top" });
@@ -41,6 +53,13 @@ export default function HomePage() {
   });
 
   const latest = resumes?.[0];
+  const listed = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const found = (resumes ?? []).filter((resume) => !needle || `${resume.title} ${templateName(resume.template)} ${resume.data.fullName} ${resume.data.professionalTitle}`.toLowerCase().includes(needle));
+    return [...found].sort(SORTS.find((item) => item.key === sort)!.compare);
+  }, [resumes, query, sort]);
+  const searching = query.trim().length > 0;
+  const visible = showAll || searching ? listed : listed.slice(0, COLLAPSED_COUNT);
   const latestProgress = latest ? completion(latest.data) : 0;
   const tip = latest ? nextTips(latest.data)[0] : undefined;
 
@@ -90,14 +109,25 @@ export default function HomePage() {
 
           {resumes && resumes.length > 0 && (
             <>
-              <div className="section-label"><h2>Your resumes</h2><span className="caption">{resumes.length}</span></div>
+              <div className="section-label"><h2>Your resumes</h2><span className="caption">{searching ? `${listed.length} of ${resumes.length}` : resumes.length}</span></div>
+              {resumes.length >= TOOLS_FROM && (
+                <div className="list-tools">
+                  <label className="search-field">
+                    <Search size={17} />
+                    <input type="search" placeholder="Search title, name or template" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search resumes" />
+                    {query && <button onClick={() => setQuery("")} aria-label="Clear search"><X size={16} /></button>}
+                  </label>
+                  <div className="scroll-row">{SORTS.map((item) => <button key={item.key} className={`chip ${sort === item.key ? "active" : ""}`} onClick={() => setSort(item.key)}>{item.label}</button>)}</div>
+                </div>
+              )}
+              {searching && listed.length === 0 && <div className="list-empty"><p>No resumes match “{query}”.</p><button className="link-btn" onClick={() => setQuery("")}>Clear search</button></div>}
               <div className="resume-list">
-                {resumes.map((resume) => {
+                {visible.map((resume) => {
                   const progress = completion(resume.data);
                   return (
                     <article key={resume.id} className="resume-row">
                       <button className="resume-row-main" onClick={() => router.push(`/resumes/${resume.id}`)}>
-                        <div className="paper resume-row-thumb"><ResumePreview data={resume.data} template={resume.template} firstPageOnly /></div>
+                        <div className="paper resume-row-thumb"><ResumePreview data={resume.data} template={resume.template} firstPageOnly lazy /></div>
                         <div className="resume-row-copy">
                           <strong>{resume.title}</strong>
                           <span className="pill">{templateName(resume.template)}</span>
@@ -110,6 +140,9 @@ export default function HomePage() {
                   );
                 })}
               </div>
+              {!searching && listed.length > COLLAPSED_COUNT && (
+                <button className="btn btn-secondary btn-block show-all" onClick={() => setShowAll((value) => !value)}>{showAll ? "Show fewer" : `Show all ${listed.length} resumes`}</button>
+              )}
             </>
           )}
         </div>

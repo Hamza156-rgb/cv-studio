@@ -28,7 +28,7 @@ export default function TemplatesPage() {
           <div className="gallery">
             {items.map((item) => (
               <button key={item.id} className="gallery-card" onClick={() => setSelected(item)}>
-                <Tilt max={12} className="gallery-tilt"><div className="gallery-art"><div className="paper"><ResumePreview data={samples[item.id]} template={item.id} firstPageOnly /></div></div></Tilt>
+                <Tilt max={12} className="gallery-tilt"><div className="gallery-art"><div className="paper"><ResumePreview data={samples[item.id]} template={item.id} firstPageOnly lazy /></div></div></Tilt>
                 <div className="gallery-meta">
                   <strong>{item.name}</strong>
                   <span>{item.ats ? <><ShieldCheck size={12} />ATS-friendly</> : item.supportsPhoto ? <><Camera size={12} />Photo-ready</> : (item as Template).category}</span>
