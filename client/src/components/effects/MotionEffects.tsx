@@ -9,8 +9,9 @@ import { useEffect, useRef } from "react";
  * visitor prefers reduced motion.
  */
 
-const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const hasFinePointer = () => window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+const mediaMatches = (query: string) => typeof window.matchMedia === "function" && window.matchMedia(query).matches;
+const prefersReducedMotion = () => mediaMatches("(prefers-reduced-motion: reduce)");
+const hasFinePointer = () => mediaMatches("(hover: hover) and (pointer: fine)");
 
 export function MotionEffects() {
   useEffect(() => {
