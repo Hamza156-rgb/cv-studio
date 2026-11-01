@@ -125,7 +125,7 @@ ion-toggle { --track-background-checked: var(--ink); --handle-spacing: 3px; }
 .paper { border-radius: 6px; box-shadow: 0 1px 2px rgba(16,43,45,.08), 0 10px 28px rgba(16,43,45,.12); overflow: hidden; }
 
 /* ---------- Tab bar ---------- */
-ion-tab-bar { --background: rgba(255, 255, 255, .92); --border: 0; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid var(--line); height: calc(64px + var(--safe-bottom)); padding-top: 6px; }
+ion-tab-bar { --background: rgba(255, 255, 255, .92); --border: 0; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid var(--line); height: 62px; padding-top: 4px; }
 ion-tab-button { --color: #8f9a96; --color-selected: var(--ink); font-weight: 600; }
 ion-tab-button svg { height: 23px; margin-bottom: 3px; transition: transform .2s var(--ease); width: 23px; }
 ion-tab-button.tab-selected svg { transform: translateY(-1px); }
@@ -516,3 +516,6 @@ body.hide-tabs ion-tab-bar { display: none; }
 .onboarding-shell .art-wall { margin: 0 auto; width: min(100%, 96cqh); }
 .onboarding-shell .art-sync { aspect-ratio: 1 / .82; height: auto; }
 .onboarding-shell .sync-card { width: 50%; }
+
+/* Ionic's tab bar adds the system navigation inset itself (padding-bottom); never add it twice. */
+ion-tab-bar { box-sizing: content-box; padding-bottom: var(--ion-safe-area-bottom, 0px); }

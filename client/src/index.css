@@ -462,3 +462,9 @@ html.pdf-render .resume-modern .resume-photo, html.pdf-render .resume-modern .re
 .resume-summit .resume-entry h3 { font-weight: 700; }
 .resume-summit .resume-experience-entry .resume-date { background: transparent; border-radius: 0; color: #141c1c; font-size: 8.4pt; font-weight: 700; padding: 0; }
 .resume-summit .resume-skills span { background: transparent; border: .6px solid color-mix(in srgb, var(--resume-accent) 45%, white); border-radius: 1mm; }
+/* Bullet and numbered lists anywhere in the resume (summary, education, projects…), not only in experience entries. */
+.resume-document ul.resume-rich-list { list-style: disc; margin: 1mm 0 1.4mm; padding-left: 4.6mm; }
+.resume-document ol.resume-rich-list { list-style: decimal; margin: 1mm 0 1.4mm; padding-left: 4.8mm; }
+.resume-document .resume-rich-list li { margin: .7mm 0; }
+.resume-document .resume-rich-list li::marker { color: var(--resume-accent); }
+.resume-document.resume-harvard .resume-rich-list li::marker, .resume-document.resume-precision .resume-rich-list li::marker, .resume-document.resume-ats .resume-rich-list li::marker { color: #111; }
