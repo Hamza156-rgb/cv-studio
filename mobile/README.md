@@ -1,4 +1,4 @@
-# CV Studio Mobile
+# Penvita Mobile
 
 Ionic React + Capacitor app for iOS and Android. It talks to the same server and database as the website through the REST API in [docs/MOBILE_API.md](../docs/MOBILE_API.md), so accounts, resumes and photos are shared with the website.
 

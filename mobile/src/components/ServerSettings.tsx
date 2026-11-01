@@ -6,7 +6,7 @@ import { API_ORIGIN, checkServer, DEFAULT_API_ORIGIN, setApiOrigin } from "../ap
 const LIVE_SITE = "https://cvbuilder-2ad3qnae.manus.space";
 const LOCAL_MAC = "http://192.168.1.106:3000";
 
-/** Lets the user point the app at another CV Studio server, checking it has the API first. */
+/** Lets the user point the app at another Penvita server, checking it has the API first. */
 export function ServerSettings() {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState(API_ORIGIN);
@@ -32,7 +32,7 @@ export function ServerSettings() {
         <div className="sheet-body">
           <p className="eyebrow">Connection</p>
           <h2 className="title">Choose a <em>server.</em></h2>
-          <p className="lede">The app uses the same accounts and resumes as this CV Studio website.</p>
+          <p className="lede">The app uses the same accounts and resumes as this Penvita website.</p>
           <div className="server-presets">
             {presets.map((preset) => (
               <button key={preset} className={`chip ${url === preset ? "active" : ""}`} onClick={() => { setUrl(preset); setStatus(""); }}>

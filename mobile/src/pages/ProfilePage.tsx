@@ -43,7 +43,7 @@ export default function ProfilePage() {
           </div>
 
           <button className="btn btn-danger btn-block profile-logout" onClick={confirmLogout}><LogOut size={18} />Sign out</button>
-          <p className="caption profile-version">CV Studio for iOS & Android · v1.0</p>
+          <p className="caption profile-version">Penvita for iOS & Android · v1.0</p>
         </div>
       </IonContent>
     </IonPage>

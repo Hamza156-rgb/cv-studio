@@ -3,8 +3,8 @@ import type { ResumeData, ResumeTemplateId } from "@shared/resume";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { absoluteAssetUrl } from "../api/client";
 
-const A4_WIDTH_PX = 793.7; // 210mm at 96 dpi
-const A4_HEIGHT_PX = 1122.5; // 297mm
+// Page sizes in CSS px (96 dpi): A4 210 × 297 mm, US Letter 8.5 × 11 in.
+const PAGE = { a4: { width: 793.7, height: 1122.5 }, letter: { width: 816, height: 1056 } } as const;
 
 /**
  * The website's own ResumeDocument, scaled to fit the screen width. `firstPageOnly` crops it
@@ -14,7 +14,8 @@ export function ResumePreview({ data, template, firstPageOnly = false, lazy = fa
   const frame = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
-  const [height, setHeight] = useState(A4_HEIGHT_PX);
+  const page = PAGE[data.theme?.pageSize === "letter" ? "letter" : "a4"];
+  const [height, setHeight] = useState<number>(page.height);
   const previewData = useMemo(() => ({ ...data, photoUrl: absoluteAssetUrl(data.photoUrl) }), [data]);
   // In long lists, only draw the document once the card scrolls near the screen.
   const [visible, setVisible] = useState(!lazy || typeof IntersectionObserver === "undefined");
@@ -30,19 +31,19 @@ export function ResumePreview({ data, template, firstPageOnly = false, lazy = fa
     const element = frame.current;
     if (!element) return;
     const observer = new ResizeObserver(() => {
-      setScale(element.clientWidth / A4_WIDTH_PX);
+      setScale(element.clientWidth / page.width);
       if (inner.current) setHeight(inner.current.scrollHeight);
     });
     observer.observe(element);
     if (inner.current) observer.observe(inner.current);
     return () => observer.disconnect();
-  }, [visible]);
+  }, [visible, page.width]);
 
-  const visibleHeight = (firstPageOnly ? A4_HEIGHT_PX : Math.max(height, A4_HEIGHT_PX)) * scale;
+  const visibleHeight = (firstPageOnly ? page.height : Math.max(height, page.height)) * scale;
   return (
     <div ref={frame} className="resume-preview-frame" style={{ height: visibleHeight }}>
       {visible ? (
-        <div ref={inner} className="resume-preview-inner" style={{ transform: `scale(${scale})` }}>
+        <div ref={inner} className="resume-preview-inner" style={{ transform: `scale(${scale})`, width: page.width }}>
           <ResumeDocument data={previewData} template={template} />
         </div>
       ) : <div className="preview-placeholder" aria-hidden="true" />}

@@ -468,3 +468,9 @@ html.pdf-render .resume-modern .resume-photo, html.pdf-render .resume-modern .re
 .resume-document .resume-rich-list li { margin: .7mm 0; }
 .resume-document .resume-rich-list li::marker { color: var(--resume-accent); }
 .resume-document.resume-harvard .resume-rich-list li::marker, .resume-document.resume-precision .resume-rich-list li::marker, .resume-document.resume-ats .resume-rich-list li::marker { color: #111; }
+
+/* US Letter page size (8.5 × 11 in). A4 stays the default. */
+.resume-document.page-letter { min-height: 279.4mm; width: 215.9mm; }
+.resume-zoom:has(> .page-letter) { height: calc(279.4mm * var(--preview-scale)); width: calc(215.9mm * var(--preview-scale)); }
+.resume-thumbnail:has(> .page-letter) > .resume-document { height: 279.4mm; }
+.style-hint { color: var(--muted-ink, #6b7a76); font-size: 10.5px; line-height: 1.45; margin: 6px 0 0; }

@@ -41,7 +41,8 @@ function paintPageBackground() {
   });
   const images = stripes.length ? `background-image: ${stripes.map((item) => item.image).join(", ")}; background-repeat: repeat-y; background-position: ${stripes.map((item) => `${item.side} top`).join(", ")}; background-size: ${stripes.map((item) => `${item.width} 10px`).join(", ")};` : "";
   const pageStyle = document.createElement("style");
-  pageStyle.textContent = `@page cv-export { background-color: ${tint}; ${images} }`;
+  const size = doc.classList.contains("page-letter") ? "letter" : "A4";
+  pageStyle.textContent = `@page cv-export { size: ${size}; background-color: ${tint}; ${images} }`;
   document.head.appendChild(pageStyle);
   // !important: the print stylesheet forces white html/body backgrounds for the browser Print button.
   document.documentElement.style.setProperty("background", "transparent", "important");

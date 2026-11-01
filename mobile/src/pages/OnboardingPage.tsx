@@ -4,12 +4,13 @@ import { ArrowRight, Cloud, FileDown, Sparkles } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { ResumePreview } from "../components/ResumePreview";
 import { Tilt } from "../components/Tilt";
+import { Logo } from "../components/Logo";
 import { markOnboarded } from "../lib/onboarding";
 
 const SLIDES = [
-  { eyebrow: "CV Studio", title: <>A resume that <em>lets your work lead.</em></>, text: "Write it once, polish it anywhere, and send a PDF that looks exactly as designed." },
+  { eyebrow: "Penvita", title: <>A resume that <em>lets your work lead.</em></>, text: "Write it once, polish it anywhere, and send a PDF that looks exactly as designed." },
   { eyebrow: "18 templates", title: <>Professional layouts, <em>one tap</em> apart.</>, text: "ATS-friendly classics, two-column designs and photo-ready layouts — switch any time, your content stays put." },
-  { eyebrow: "Always in sync", title: <>Edit on your phone. <em>Finish</em> on the web.</>, text: "Your resumes, photos and templates sync with the CV Studio website on every device." },
+  { eyebrow: "Always in sync", title: <>Edit on your phone. <em>Finish</em> on the web.</>, text: "Your resumes, photos and templates sync with the Penvita website on every device." },
 ];
 
 export default function OnboardingPage() {
@@ -28,7 +29,7 @@ export default function OnboardingPage() {
       <IonContent fullscreen scrollY={false} className="onboarding">
         <div className="onboarding-shell">
         <div className="onboarding-top">
-          <div className="brand-row light"><span className="brand-mark light">cv</span><strong>CV Studio</strong></div>
+          <div className="brand-row light"><Logo size={40} className="logo-onboarding" /><strong>Penvita</strong></div>
           {!last && <button className="link-light" onClick={() => go(SLIDES.length - 1)}>Skip</button>}
         </div>
 

@@ -1,0 +1,9 @@
+<!-- Penvita nib only (cream nib, terracotta ink hole) on a transparent 512 canvas. Used as the adaptive-icon foreground. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <g transform="translate(256 254) scale(1.1)">
+    <rect x="-42" y="-142" width="84" height="30" rx="9" fill="#FBF8F1"/>
+    <path d="M-58 -100 H58 C80 -100 95 -84 91 -62 C83 -10 50 58 14 126 C8 138 -8 138 -14 126 C-50 58 -83 -10 -91 -62 C-95 -84 -80 -100 -58 -100 Z" fill="#FBF8F1"/>
+    <path d="M0 -14 V120" stroke="#17383A" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="0" cy="-34" r="20" fill="#C47A61"/>
+  </g>
+</svg>

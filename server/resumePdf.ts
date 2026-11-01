@@ -123,7 +123,8 @@ export async function renderResumePdf(origin: string, payload: { data: unknown; 
     await page.evaluateOnNewDocument((value) => { (window as unknown as { __CV_RENDER__: unknown }).__CV_RENDER__ = value; }, payload);
     await page.goto(`${origin}/render/resume`, { waitUntil: "domcontentloaded", timeout: RENDER_TIMEOUT_MS });
     await page.waitForFunction("window.__CV_READY__ === true", { timeout: RENDER_TIMEOUT_MS });
-    return await page.pdf({ format: "A4", printBackground: true, preferCSSPageSize: true });
+    const letter = (payload.data as { theme?: { pageSize?: string } } | null)?.theme?.pageSize === "letter";
+    return await page.pdf({ format: letter ? "Letter" : "A4", printBackground: true, preferCSSPageSize: true });
   } finally {
     await page.close().catch(() => undefined);
   }

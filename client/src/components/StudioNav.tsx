@@ -1,11 +1,11 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { FileText, Menu, Sparkles } from "lucide-react";
+import { Menu, Sparkles } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 
 export function Brand({ inverted = false }: { inverted?: boolean }) {
-  return <Link href="/" className={`brand ${inverted ? "brand-inverted" : ""}`}><span className="brand-mark"><FileText size={17} strokeWidth={2.5} /></span><span>CV Studio</span></Link>;
+  return <Link href="/" className={`brand ${inverted ? "brand-inverted" : ""}`}><img className="brand-logo" src="/brand/penvita-icon.svg" alt="" width={32} height={32} /><span>Penvita</span></Link>;
 }
 
 /** Smoothly scrolls to a section of the home page, navigating home first when needed. */

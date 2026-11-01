@@ -57,3 +57,9 @@ html, body { background: #fff; }
 #how-it-works, #faq { scroll-margin-top: 92px; }
 /* "Edit with a clear view" band: neutral instead of the old sand, so it sits on the white theme. */
 section.editor-teaser { background: linear-gradient(180deg, #f3f6f5, #e9eeec); }
+
+/* Penvita logo */
+.brand .brand-logo { border-radius: 9px; box-shadow: 0 2px 6px rgba(16,43,45,.18); display: block; flex: 0 0 auto; height: 32px; width: 32px; }
+.brand-inverted .brand-logo { box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
+.loading-logo { animation: logo-pulse 1.6s ease-in-out infinite; border-radius: 14px; box-shadow: 0 10px 24px rgba(16,43,45,.22); }
+@keyframes logo-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }

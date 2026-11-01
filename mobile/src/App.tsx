@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { hasOnboarded } from "./lib/onboarding";
+import { Logo } from "./components/Logo";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -41,7 +42,7 @@ function Routes() {
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
   useEffect(() => { hasOnboarded().then(setOnboarded); }, []);
 
-  if (status === "loading" || onboarded === null) return <div className="splash"><span className="brand-mark">cv</span></div>;
+  if (status === "loading" || onboarded === null) return <div className="splash"><Logo size={88} /></div>;
   return (
     <IonReactRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       {status === "signedIn" ? <SignedInApp /> : (

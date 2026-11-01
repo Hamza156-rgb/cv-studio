@@ -1,4 +1,5 @@
 import { IonHeader } from "@ionic/react";
+import { Logo } from "./Logo";
 import type { ReactNode } from "react";
 
 /**
@@ -9,7 +10,7 @@ export function AppHeader({ title, actions, condensed }: { title: string; action
   return (
     <IonHeader className={`app-header ${condensed ? "condensed" : ""}`}>
       <div className="app-bar">
-        <div className="app-bar-brand"><span className="brand-mark small">cv</span><strong>CV Studio</strong></div>
+        <div className="app-bar-brand"><Logo size={34} className="logo-header" /><strong>Penvita</strong></div>
         <span className="app-bar-title" aria-hidden={!condensed}>{title}</span>
         <div className="app-bar-actions">{actions}</div>
       </div>

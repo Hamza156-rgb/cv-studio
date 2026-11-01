@@ -3,6 +3,9 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// jsdom has no matchMedia; the auth page checks prefers-reduced-motion for its animation.
+if (!window.matchMedia) window.matchMedia = ((query: string) => ({ matches: false, media: query, onchange: null, addListener: () => {}, removeListener: () => {}, addEventListener: () => {}, removeEventListener: () => {}, dispatchEvent: () => false })) as typeof window.matchMedia;
+
 const mocks = vi.hoisted(() => ({ authMe: { setData: vi.fn(), invalidate: vi.fn() }, signIn: vi.fn(), signUp: vi.fn(), toastError: vi.fn(), signInError: "" }));
 
 vi.mock("@/lib/trpc", () => ({
@@ -15,7 +18,7 @@ vi.mock("@/lib/trpc", () => ({
   },
 }));
 
-vi.mock("@/components/StudioNav", () => ({ Brand: () => <span>CV Studio</span> }));
+vi.mock("@/components/StudioNav", () => ({ Brand: () => <span>Penvita</span> }));
 vi.mock("sonner", () => ({ toast: { error: mocks.toastError, success: vi.fn() } }));
 
 import Auth from "./Auth";
@@ -49,7 +52,7 @@ describe("credential screens", () => {
     render(<Auth mode="login" />);
     fireEvent.change(screen.getByLabelText("Email address"), { target: { value: "jordan@example.com" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "incorrect-password" } });
-    fireEvent.submit(screen.getByRole("button", { name: "Sign in to CV Studio" }).closest("form")!);
+    fireEvent.submit(screen.getByRole("button", { name: "Sign in to Penvita" }).closest("form")!);
     expect(mocks.toastError).toHaveBeenCalledWith("Incorrect email or password.");
   });
 });

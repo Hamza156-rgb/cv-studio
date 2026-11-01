@@ -1,6 +1,6 @@
-# CV Studio Mobile API (v1)
+# Penvita Mobile API (v1)
 
-REST API for the CV Studio mobile app. It runs on the same server and database as the website, so accounts and resumes are shared: a resume saved in the app appears on the website, and vice versa.
+REST API for the Penvita mobile app. It runs on the same server and database as the website, so accounts and resumes are shared: a resume saved in the app appears on the website, and vice versa.
 
 - **Base URL:** `https://<your-domain>/api/v1`
 - **Full reference (OpenAPI 3.1):** `GET /api/v1/openapi.json`. Import it into Postman or Insomnia, or generate a typed client with `openapi-generator` (Swift, Kotlin, Dart) or `openapi-typescript` (React Native).

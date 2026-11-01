@@ -12,10 +12,10 @@ const standardErrors = { 401: error("Missing, invalid or expired token."), 500: 
 export const MOBILE_API_SPEC = {
   openapi: "3.1.0",
   info: {
-    title: "CV Studio Mobile API",
+    title: "Penvita Mobile API",
     version: "1.0.0",
     description: [
-      "REST API for the CV Studio mobile app. It uses the same database and accounts as the website, so a resume created on one appears on the other.",
+      "REST API for the Penvita mobile app. It uses the same database and accounts as the website, so a resume created on one appears on the other.",
       "",
       "Authentication: call /auth/login or /auth/signup, store the returned `token` securely (Keychain / Keystore), and send it as `Authorization: Bearer <token>`. Tokens last 30 days; call /auth/refresh to get a fresh one while the current token is still valid. Signing out means deleting the stored token.",
       "",

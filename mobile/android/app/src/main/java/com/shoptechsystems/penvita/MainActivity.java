@@ -1,4 +1,4 @@
-package com.cvstudio.app;
+package com.shoptechsystems.penvita;
 
 import com.getcapacitor.BridgeActivity;
 

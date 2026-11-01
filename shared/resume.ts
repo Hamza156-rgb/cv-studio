@@ -30,6 +30,8 @@ export type ResumeTheme = {
   photoShape: "circle" | "rounded" | "square";
   atsMode: boolean;
   experienceOrderMode: "auto" | "manual";
+  /** A4 (UK, Europe, most of the world) or US Letter (USA, Canada). */
+  pageSize: "a4" | "letter";
 };
 
 export type Experience = { id: string; role: string; company: string; location: string; start: string; end: string; current: boolean; description: string; highlights: string[] };
@@ -66,7 +68,7 @@ export type ResumeData = {
   theme: ResumeTheme;
 };
 
-const defaultTheme: ResumeTheme = { accent: "#24474A", text: "#1C2526", font: "modern", scale: "comfortable", photoShape: "circle", atsMode: false, experienceOrderMode: "auto" };
+const defaultTheme: ResumeTheme = { accent: "#24474A", text: "#1C2526", font: "modern", scale: "comfortable", photoShape: "circle", atsMode: false, experienceOrderMode: "auto", pageSize: "a4" };
 const makeFallbackId = () => `resume-item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 export const newResumeData = (template: ResumeTemplateId = "modern"): ResumeData => ({
@@ -117,7 +119,7 @@ export function normalizeResumeData(value: unknown, template: ResumeTemplateId =
   return {
     ...base,
     ...candidate,
-    theme: { ...base.theme, ...(candidate.theme ?? {}) },
+    theme: (() => { const theme = { ...base.theme, ...(candidate.theme ?? {}) }; if (theme.pageSize !== "letter") theme.pageSize = "a4"; return theme; })(),
     experiences: Array.isArray(candidate.experiences) ? candidate.experiences : [],
     education: Array.isArray(candidate.education) ? candidate.education : [],
     skills: Array.isArray(candidate.skills) ? candidate.skills : [],

@@ -44,7 +44,7 @@ export function ResumeDocument({ data, template, className = "" }: Props) {
 
   return (
     <article
-      className={`resume-document resume-${template} resume-scale-${data.theme.scale} font-${data.theme.font} ${data.theme.atsMode ? "resume-ats" : ""} ${className}`}
+      className={`resume-document resume-${template} page-${data.theme.pageSize ?? "a4"} resume-scale-${data.theme.scale} font-${data.theme.font} ${data.theme.atsMode ? "resume-ats" : ""} ${className}`}
       style={{ "--resume-accent": data.theme.accent, "--resume-text": data.theme.text } as React.CSSProperties}
       aria-label="Live resume preview"
     >

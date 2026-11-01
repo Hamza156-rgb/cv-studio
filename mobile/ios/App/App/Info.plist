@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>CV Studio</string>
+        <string>Penvita</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -67,10 +67,10 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>CV Studio uses the camera so you can take a professional headshot for your resume.</string>
+	<string>Penvita uses the camera so you can take a professional headshot for your resume.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>CV Studio lets you choose a headshot from your photos for your resume.</string>
+	<string>Penvita lets you choose a headshot from your photos for your resume.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>CV Studio can save photos you take to your library.</string>
+	<string>Penvita can save photos you take to your library.</string>
 </dict>
 </plist>

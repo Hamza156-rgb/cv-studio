@@ -1,6 +1,6 @@
 import type { RESUME_TEMPLATES, ResumeData, ResumeTemplateId } from "@shared/resume";
 
-/** Typed client for every endpoint of the CV Studio REST API (/api/v1). See docs/MOBILE_API.md. */
+/** Typed client for every endpoint of the Penvita REST API (/api/v1). See docs/MOBILE_API.md. */
 
 const SERVER_KEY = "cv-studio.server";
 const clean = (url: string) => url.trim().replace(/\/+$/, "");
@@ -10,18 +10,18 @@ const storedOrigin = () => { try { return localStorage.getItem(SERVER_KEY); } ca
 export let API_ORIGIN = storedOrigin() || DEFAULT_API_ORIGIN;
 const apiBase = () => `${API_ORIGIN}/api/v1`;
 
-/** Points the app at another CV Studio server (pass null to go back to the default). */
+/** Points the app at another Penvita server (pass null to go back to the default). */
 export function setApiOrigin(url: string | null) {
   API_ORIGIN = url ? clean(url) : DEFAULT_API_ORIGIN;
   try { if (url) localStorage.setItem(SERVER_KEY, API_ORIGIN); else localStorage.removeItem(SERVER_KEY); } catch { /* storage unavailable */ }
 }
 
-/** Checks that a server actually runs the CV Studio API (not just the website). */
+/** Checks that a server actually runs the Penvita API (not just the website). */
 export async function checkServer(url: string) {
   try {
     const response = await fetch(`${clean(url)}/api/v1`, { headers: { Accept: "application/json" } });
     const body = await response.json().catch(() => null) as { name?: string } | null;
-    return body?.name === "CV Studio API" ? "ok" as const : "no-api" as const;
+    return body?.name === "Penvita API" || body?.name === "CV Studio API" ? "ok" as const : "no-api" as const;
   } catch {
     return "unreachable" as const;
   }
@@ -57,10 +57,10 @@ async function send(path: string, init: RequestInit = {}): Promise<Response> {
       headers: { ...(init.body ? { "Content-Type": "application/json" } : {}), ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}), ...init.headers },
     });
   } catch {
-    throw new ApiError(0, "NETWORK", "Can't reach CV Studio. Check your connection and try again.");
+    throw new ApiError(0, "NETWORK", "Can't reach Penvita. Check your connection and try again.");
   }
   // A server without the API answers with the website's HTML page instead of JSON.
-  if (response.ok && (response.headers.get("Content-Type") ?? "").includes("text/html")) throw new ApiError(response.status, "NO_API", "This server doesn't have the CV Studio app API yet. Redeploy the latest code, or change the server on the sign-in screen.");
+  if (response.ok && (response.headers.get("Content-Type") ?? "").includes("text/html")) throw new ApiError(response.status, "NO_API", "This server doesn't have the Penvita app API yet. Redeploy the latest code, or change the server on the sign-in screen.");
   if (response.ok) return response;
   const body = await response.json().catch(() => null) as { error?: { code?: string; message?: string; details?: { path: string; message: string }[] } } | null;
   if (response.status === 401 && authToken) onUnauthorized?.();

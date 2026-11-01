@@ -92,7 +92,7 @@ const authed = (fn: (req: AuthedRequest, res: Response) => Promise<unknown>) => 
 export function createMobileApiRouter() {
   const router = express.Router();
 
-  router.get("/", (_req, res) => { res.json({ name: "CV Studio API", version: "1", docs: "/api/v1/openapi.json" }); });
+  router.get("/", (_req, res) => { res.json({ name: "Penvita API", version: "1", docs: "/api/v1/openapi.json" }); });
   router.get("/openapi.json", (_req, res) => { res.json(MOBILE_API_SPEC); });
   router.get("/templates", (_req, res) => { res.json({ templates: RESUME_TEMPLATES }); });
 

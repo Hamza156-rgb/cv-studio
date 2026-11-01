@@ -4,9 +4,10 @@ import { useRef, useState, type FormEvent } from "react";
 import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { ServerSettings } from "../components/ServerSettings";
+import { Logo } from "../components/Logo";
 
 const COPY = {
-  login: { eyebrow: "Welcome back", title: <>Sign in to <em>continue.</em></>, text: "Pick up where you left off — your resumes are synced with the website.", action: "Sign in", switchText: "New to CV Studio?", switchAction: "Create an account", switchTo: "/signup" },
+  login: { eyebrow: "Welcome back", title: <>Sign in to <em>continue.</em></>, text: "Pick up where you left off — your resumes are synced with the website.", action: "Sign in", switchText: "New to Penvita?", switchAction: "Create an account", switchTo: "/signup" },
   signup: { eyebrow: "Get started — it's free", title: <>Create your <em>account.</em></>, text: "One account for the app and the website. It takes less than a minute.", action: "Create account", switchText: "Already have an account?", switchAction: "Sign in", switchTo: "/login" },
 } as const;
 
@@ -49,7 +50,7 @@ export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
         <div className="auth-wrap">
           <button className="icon-btn" onClick={() => router.push("/welcome", "back", "replace")} aria-label="Back to welcome"><ArrowLeft size={19} /></button>
           <div className="auth-head">
-            <span className="brand-mark" onPointerDown={startPress} onPointerUp={endPress} onPointerLeave={endPress} onContextMenu={(event) => event.preventDefault()}>cv</span>
+            <span className="auth-logo-wrap" onPointerDown={startPress} onPointerUp={endPress} onPointerLeave={endPress} onContextMenu={(event) => event.preventDefault()}><Logo size={60} /></span>
             <p className="eyebrow">{copy.eyebrow}</p>
             <h1 className="display">{copy.title}</h1>
             <p className="lede">{copy.text}</p>

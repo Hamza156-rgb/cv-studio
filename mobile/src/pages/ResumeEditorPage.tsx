@@ -373,6 +373,9 @@ function StyleSheet({ isOpen, onClose, data, updateData, template, setTemplate }
         {options(["modern", "serif", "classic"] as const, data.theme.font, (font) => theme({ font }))}
         <h3 className="style-label">Density</h3>
         {options(["compact", "comfortable", "airy"] as const, data.theme.scale, (scale) => theme({ scale }))}
+        <h3 className="style-label">Page size</h3>
+        <div className="segmented">{([["a4", "A4"], ["letter", "US Letter"]] as const).map(([value, label]) => <button key={value} className={(data.theme.pageSize ?? "a4") === value ? "active" : ""} onClick={() => theme({ pageSize: value })}>{label}</button>)}</div>
+        <p className="style-note">A4 for the UK and most countries · US Letter for the USA and Canada.</p>
         <h3 className="style-label">Photo shape</h3>
         {options(["circle", "rounded", "square"] as const, data.theme.photoShape, (photoShape) => theme({ photoShape }))}
         <label className="switch-row ats-row"><span>Plain ATS mode<small>Removes colour and photos for applicant tracking systems</small></span><IonToggle checked={data.theme.atsMode} onIonChange={(event) => theme({ atsMode: event.detail.checked })} aria-label="Plain ATS mode" /></label>
