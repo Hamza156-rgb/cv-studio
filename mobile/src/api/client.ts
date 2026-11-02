@@ -7,7 +7,8 @@ const clean = (url: string) => url.trim().replace(/\/+$/, "");
 /** Server baked in at build time (VITE_API_URL); the user can override it from the sign-in screen. */
 export const DEFAULT_API_ORIGIN = clean((import.meta.env.VITE_API_URL as string | undefined) ?? "") || "http://localhost:3000";
 const storedOrigin = () => { try { return localStorage.getItem(SERVER_KEY); } catch { return null; } };
-export let API_ORIGIN = storedOrigin() || DEFAULT_API_ORIGIN;
+// Release builds always use the baked-in HTTPS server; the override is a development option only.
+export let API_ORIGIN = (import.meta.env.DEV && storedOrigin()) || DEFAULT_API_ORIGIN;
 const apiBase = () => `${API_ORIGIN}/api/v1`;
 
 /** Points the app at another Penvita server (pass null to go back to the default). */
@@ -84,6 +85,7 @@ export const api = {
   refresh: () => request<Session>("/auth/refresh", post()),
   me: () => request<{ user: User }>("/auth/me").then((result) => result.user),
   logout: () => request<void>("/auth/logout", post()),
+  deleteAccount: () => request<void>("/auth/account", { method: "DELETE" }),
 
   // Resumes
   listResumes: () => request<{ resumes: Resume[] }>("/resumes").then((result) => result.resumes),

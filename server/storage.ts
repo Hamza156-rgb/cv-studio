@@ -120,10 +120,14 @@ export async function storageGetSignedUrl(relKey: string): Promise<string> {
   return url;
 }
 
+/**
+ * Removes a stored file. Local disk storage is deleted directly. Returns false when the file
+ * could not be removed, e.g. Forge storage, whose API in this project only exposes put/get.
+ */
 export async function storageDelete(relKey: string): Promise<boolean> {
   if (isForgeStorageConfigured()) return false;
   const filePath = resolveLocalStoragePath(relKey);
-  if (!filePath) throw new Error("Invalid storage key");
+  if (!filePath) return false;
   await rm(filePath, { force: true });
   return true;
 }

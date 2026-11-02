@@ -120,10 +120,15 @@ export function createMobileApiRouter() {
   router.get("/auth/me", authed(async (req, res) => { res.json({ user: publicUser(req.user) }); }));
   // Tokens are stateless: signing out means the app deletes its stored token.
   router.post("/auth/logout", authed(async (_req, res) => { res.status(204).end(); }));
+  // Permanently deletes the account, its resumes, photo records and photo files (Play account-deletion requirement).
   router.delete("/auth/account", authed(async (req, res) => {
-    const storageKeys = await deleteUserAccount(req.user.id);
-    for (const storageKey of storageKeys) {
-      try { await storageDelete(storageKey); } catch (error) { console.error("[MobileApi] failed to delete storage object", storageKey, error); }
+    const keys = await deleteUserAccount(req.user.id);
+    for (const key of keys) {
+      try {
+        if (!(await storageDelete(key))) console.warn(`[MobileApi] photo file not removed from storage: ${key}`);
+      } catch (error) {
+        console.error(`[MobileApi] could not delete photo file ${key}`, error);
+      }
     }
     res.status(204).end();
   }));
