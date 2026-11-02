@@ -2,7 +2,7 @@
 // Uploads via Forge Server presigned URL to S3 (PUT direct).
 // Downloads return /manus-storage/{key} paths served via 307 redirect.
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ENV } from "./_core/env";
 
@@ -118,4 +118,16 @@ export async function storageGetSignedUrl(relKey: string): Promise<string> {
 
   const { url } = (await resp.json()) as { url: string };
   return url;
+}
+
+/**
+ * Removes a stored file. Local disk storage is deleted directly. Returns false when the file
+ * could not be removed, e.g. Forge storage, whose API in this project only exposes put/get.
+ */
+export async function storageDelete(relKey: string): Promise<boolean> {
+  if (isForgeStorageConfigured()) return false;
+  const filePath = resolveLocalStoragePath(relKey);
+  if (!filePath) return false;
+  await rm(filePath, { force: true });
+  return true;
 }

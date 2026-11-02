@@ -548,3 +548,6 @@ ion-tab-bar { box-sizing: content-box; padding-bottom: var(--ion-safe-area-botto
 @keyframes logo-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
 .style-note { color: var(--subtle); font-size: 12px; margin: 8px 2px 0; }
+
+.auth-legal { margin-top: 14px; text-align: center; }
+.auth-legal a { color: inherit; text-decoration: underline; }

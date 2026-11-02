@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 const db = vi.hoisted(() => ({
   createResumeForUser: vi.fn(),
   deleteResumeForUser: vi.fn(),
+  deleteUserAccount: vi.fn(),
   duplicateResumeForUser: vi.fn(),
   getResumeForUser: vi.fn(),
   listResumePhotosForUser: vi.fn(),
@@ -17,7 +18,7 @@ const db = vi.hoisted(() => ({
   getUserById: vi.fn(),
   touchCredentialUser: vi.fn(),
 }));
-const storage = vi.hoisted(() => ({ storagePut: vi.fn() }));
+const storage = vi.hoisted(() => ({ storagePut: vi.fn(), storageDelete: vi.fn() }));
 const pdf = vi.hoisted(() => ({ sendResumePdf: vi.fn() }));
 
 vi.mock("./db", () => db);
@@ -126,6 +127,17 @@ describe("mobile REST API", () => {
 
     db.deleteResumeForUser.mockResolvedValue(true);
     expect((await call("/resumes/17", { method: "DELETE" })).status).toBe(204);
+  });
+
+  it("deletes the account and its photo files, and requires sign-in", async () => {
+    expect((await call("/auth/account", { method: "DELETE", auth: false })).status).toBe(401);
+    expect(db.deleteUserAccount).not.toHaveBeenCalled();
+    db.deleteUserAccount.mockResolvedValue(["resume-photos/42/a.jpg", "resume-photos/42/b.jpg"]);
+    storage.storageDelete.mockResolvedValue(true);
+    const response = await call("/auth/account", { method: "DELETE" });
+    expect(response.status).toBe(204);
+    expect(db.deleteUserAccount).toHaveBeenCalledWith(42);
+    expect(storage.storageDelete.mock.calls.map(([key]) => key)).toEqual(["resume-photos/42/a.jpg", "resume-photos/42/b.jpg"]);
   });
 
   it("returns 404 for resumes that belong to someone else, and 400 with details for bad input", async () => {

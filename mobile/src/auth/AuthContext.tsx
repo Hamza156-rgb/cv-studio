@@ -12,6 +12,7 @@ type AuthState = {
   login: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -65,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login: async (email, password) => signedIn(await api.login({ email, password })),
     signUp: async (name, email, password) => signedIn(await api.signUp({ name, email, password })),
     logout: async () => { await api.logout().catch(() => undefined); await signedOut(); },
+    deleteAccount: async () => { await api.deleteAccount(); await signedOut(); },
   }), [status, user, signedIn, signedOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

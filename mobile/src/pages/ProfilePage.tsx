@@ -1,12 +1,13 @@
 import { IonContent, IonPage, useIonAlert, useIonViewWillEnter } from "@ionic/react";
-import { CalendarDays, ChevronRight, Globe, LogOut, Mail } from "lucide-react";
+import { CalendarDays, ChevronRight, FileText, Globe, LogOut, Mail, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { api, API_ORIGIN } from "../api/client";
 import { AppHeader, onScroll } from "../components/AppHeader";
 import { useAuth } from "../auth/AuthContext";
+import { PRIVACY_URL, TERMS_URL } from "../lib/legal";
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const [presentAlert] = useIonAlert();
   const [condensed, setCondensed] = useState(false);
   const [stats, setStats] = useState<{ resumes: number; photos: number } | null>(null);
@@ -17,6 +18,15 @@ export default function ProfilePage() {
   });
 
   const confirmLogout = () => presentAlert({ header: "Sign out?", message: "Your resumes stay safe in your account.", buttons: [{ text: "Cancel", role: "cancel" }, { text: "Sign out", role: "destructive", handler: () => { void logout(); } }] });
+
+  const confirmDelete = () => presentAlert({
+    header: "Delete your account?",
+    message: "This permanently deletes your account, all your resumes and your uploaded photos. This cannot be undone.",
+    buttons: [
+      { text: "Cancel", role: "cancel" },
+      { text: "Delete account", role: "destructive", handler: () => { deleteAccount().catch((error) => presentAlert({ header: "Couldn't delete account", message: error instanceof Error ? error.message : "Please try again.", buttons: ["OK"] })); } },
+    ],
+  });
 
   return (
     <IonPage>
@@ -42,8 +52,15 @@ export default function ProfilePage() {
             <a className="settings-row" href={API_ORIGIN} target="_blank" rel="noreferrer"><span className="qa-icon mint"><Globe size={17} /></span><div><strong>Open the website</strong><small>Same account, same resumes</small></div><ChevronRight size={18} className="settings-chevron" /></a>
           </div>
 
+          <div className="section-label"><h2>Legal</h2></div>
+          <div className="settings-list">
+            <a className="settings-row" href={PRIVACY_URL} target="_blank" rel="noreferrer"><span className="qa-icon mint"><ShieldCheck size={17} /></span><div><strong>Privacy Policy</strong></div><ChevronRight size={18} className="settings-chevron" /></a>
+            <a className="settings-row" href={TERMS_URL} target="_blank" rel="noreferrer"><span className="qa-icon mint"><FileText size={17} /></span><div><strong>Terms of Use</strong></div><ChevronRight size={18} className="settings-chevron" /></a>
+          </div>
+
           <button className="btn btn-danger btn-block profile-logout" onClick={confirmLogout}><LogOut size={18} />Sign out</button>
-          <p className="caption profile-version">Penvita for iOS & Android · v1.0</p>
+          <button className="btn btn-danger btn-block profile-logout" onClick={confirmDelete}><Trash2 size={18} />Delete account</button>
+          <p className="caption profile-version">Penvita · v1.0</p>
         </div>
       </IonContent>
     </IonPage>

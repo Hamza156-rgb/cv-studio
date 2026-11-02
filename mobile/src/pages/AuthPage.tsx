@@ -5,6 +5,7 @@ import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { ServerSettings } from "../components/ServerSettings";
 import { Logo } from "../components/Logo";
+import { MIN_AGE, PRIVACY_URL, TERMS_URL } from "../lib/legal";
 
 const COPY = {
   login: { eyebrow: "Welcome back", title: <>Sign in to <em>continue.</em></>, text: "Pick up where you left off — your resumes are synced with the website.", action: "Sign in", switchText: "New to Penvita?", switchAction: "Create an account", switchTo: "/signup" },
@@ -23,8 +24,9 @@ export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
   const copy = COPY[mode];
   // Developer option: long-press the logo to show the server picker (hidden from normal users).
   const [showServer, setShowServer] = useState(false);
+  const canPickServer = import.meta.env.DEV;
   const pressTimer = useRef<number | undefined>(undefined);
-  const startPress = () => { pressTimer.current = window.setTimeout(() => setShowServer(true), 1200); };
+  const startPress = () => { pressTimer.current = window.setTimeout(() => { if (canPickServer) setShowServer(true); }, 1200); };
   const endPress = () => window.clearTimeout(pressTimer.current);
   const passwordTooShort = mode === "signup" && password.length > 0 && password.length < 8;
   const ready = Boolean(email && password && (mode === "login" || (name.trim() && password.length >= 8)));
@@ -72,6 +74,8 @@ export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
             <button type="submit" className="btn btn-primary btn-block" disabled={busy || !ready}>{busy ? <LoaderCircle size={20} className="spin" /> : copy.action}</button>
           </form>
           <p className="auth-switch">{copy.switchText} <button className="link-btn" onClick={() => { setError(""); router.push(copy.switchTo, "none", "replace"); }}>{copy.switchAction}</button></p>
+          {mode === "signup" && <p className="caption auth-legal">You must be {MIN_AGE} or older. By creating an account you agree to the <a href={TERMS_URL} target="_blank" rel="noreferrer">Terms of Use</a> and <a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy Policy</a>.</p>}
+          {mode === "login" && <p className="caption auth-legal"><a href={TERMS_URL} target="_blank" rel="noreferrer">Terms of Use</a> · <a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy Policy</a></p>}
           <p className="auth-secure"><LockKeyhole size={13} />One secure account for the app and the website</p>
           {showServer && <div className="server-row"><ServerSettings /></div>}
         </div>

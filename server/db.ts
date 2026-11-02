@@ -131,3 +131,19 @@ export async function createResumePhoto(input: { userId: number; storageKey: str
   const rows = await db.select().from(resumePhotos).where(and(eq(resumePhotos.id, id), eq(resumePhotos.userId, input.userId))).limit(1);
   return rows[0];
 }
+
+/**
+ * Permanently deletes an account with its resumes, photo records and sign-in credentials.
+ * Returns the storage keys of the user's photos so the caller can remove the files.
+ */
+export async function deleteUserAccount(userId: number) {
+  const db = await requireDb();
+  return db.transaction(async (tx) => {
+    const photos = await tx.select({ storageKey: resumePhotos.storageKey }).from(resumePhotos).where(eq(resumePhotos.userId, userId));
+    await tx.delete(resumes).where(eq(resumes.userId, userId));
+    await tx.delete(resumePhotos).where(eq(resumePhotos.userId, userId));
+    await tx.delete(credentialAccounts).where(eq(credentialAccounts.userId, userId));
+    await tx.delete(users).where(eq(users.id, userId));
+    return photos.map((photo) => photo.storageKey);
+  });
+}

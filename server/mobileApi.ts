@@ -4,12 +4,12 @@ import { z } from "zod";
 import type { User } from "../drizzle/schema";
 import { RESUME_TEMPLATES, normalizeResumeData } from "../shared/resume";
 import { authenticateCredentialAccount, getUserForSessionToken, issueCredentialSession, registerCredentialAccount } from "./credentialAuth";
-import { createResumeForUser, createResumePhoto, deleteResumeForUser, duplicateResumeForUser, getResumeForUser, listResumePhotosForUser, listResumesForUser, updateResumeForUser } from "./db";
+import { createResumeForUser, createResumePhoto, deleteResumeForUser, deleteUserAccount, duplicateResumeForUser, getResumeForUser, listResumePhotosForUser, listResumesForUser, updateResumeForUser } from "./db";
 import { MOBILE_API_SPEC } from "./mobileApiSpec";
 import { importResumeDocument, MAX_IMPORT_BYTES } from "./resumeImport";
 import { sendResumePdf } from "./resumePdf";
 import { decodeResumePhoto, toResumeDto } from "./routers";
-import { storagePut } from "./storage";
+import { storageDelete, storagePut } from "./storage";
 
 /*
  * Versioned REST API for the mobile app, mounted at /api/v1. It shares the website's database,
@@ -120,6 +120,19 @@ export function createMobileApiRouter() {
   router.get("/auth/me", authed(async (req, res) => { res.json({ user: publicUser(req.user) }); }));
   // Tokens are stateless: signing out means the app deletes its stored token.
   router.post("/auth/logout", authed(async (_req, res) => { res.status(204).end(); }));
+
+  // Permanently deletes the account, its resumes, photo records and photo files (Play account-deletion requirement).
+  router.delete("/auth/account", authed(async (req, res) => {
+    const keys = await deleteUserAccount(req.user.id);
+    for (const key of keys) {
+      try {
+        if (!(await storageDelete(key))) console.warn(`[MobileApi] photo file not removed from storage: ${key}`);
+      } catch (error) {
+        console.error(`[MobileApi] could not delete photo file ${key}`, error);
+      }
+    }
+    res.status(204).end();
+  }));
 
   // ---- Resumes ----
   router.get("/resumes", authed(async (req, res) => {

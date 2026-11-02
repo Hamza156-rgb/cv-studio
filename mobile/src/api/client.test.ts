@@ -52,7 +52,7 @@ describe("mobile API client", () => {
   it("has one client function per operation in the server's OpenAPI document", async () => {
     const { MOBILE_API_SPEC } = await import("../../../server/mobileApiSpec");
     const operations = Object.values(MOBILE_API_SPEC.paths).flatMap((path) => Object.keys(path).filter((key) => ["get", "post", "patch", "delete"].includes(key)));
-    expect(operations).toHaveLength(16);
+    expect(operations).toHaveLength(17);
     expect(Object.keys(api)).toHaveLength(operations.length);
   });
 
