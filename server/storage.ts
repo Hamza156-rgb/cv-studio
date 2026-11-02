@@ -2,7 +2,7 @@
 // Uploads via Forge Server presigned URL to S3 (PUT direct).
 // Downloads return /manus-storage/{key} paths served via 307 redirect.
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ENV } from "./_core/env";
 
@@ -118,4 +118,12 @@ export async function storageGetSignedUrl(relKey: string): Promise<string> {
 
   const { url } = (await resp.json()) as { url: string };
   return url;
+}
+
+export async function storageDelete(relKey: string): Promise<boolean> {
+  if (isForgeStorageConfigured()) return false;
+  const filePath = resolveLocalStoragePath(relKey);
+  if (!filePath) throw new Error("Invalid storage key");
+  await rm(filePath, { force: true });
+  return true;
 }

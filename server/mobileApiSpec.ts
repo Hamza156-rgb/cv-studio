@@ -87,6 +87,7 @@ export const MOBILE_API_SPEC = {
     "/auth/refresh": { post: { summary: "Exchange a valid token for a new 30-day token", security: secured, responses: { 200: { description: "New session", content: json(ref("Session")) }, ...standardErrors } } },
     "/auth/me": { get: { summary: "Current user", security: secured, responses: { 200: { description: "User", content: json({ type: "object", properties: { user: ref("User") } }) }, ...standardErrors } } },
     "/auth/logout": { post: { summary: "Sign out (the app should delete its stored token)", security: secured, responses: { 204: { description: "Signed out" }, ...standardErrors } } },
+    "/auth/account": { delete: { summary: "Permanently delete the current account and its data", security: secured, responses: { 204: { description: "Account deleted" }, ...standardErrors } } },
     "/resumes": {
       get: { summary: "List the user's resumes, most recently updated first", security: secured, responses: { 200: { description: "Resumes", content: json({ type: "object", properties: { resumes: { type: "array", items: ref("Resume") } } }) }, ...standardErrors } },
       post: {

@@ -113,6 +113,18 @@ export async function deleteResumeForUser(userId: number, id: number) {
   return Number(result?.[0]?.affectedRows ?? result?.affectedRows ?? 0) > 0;
 }
 
+export async function deleteUserAccount(userId: number) {
+  const db = await requireDb();
+  return db.transaction(async (tx) => {
+    const photos = await tx.select({ storageKey: resumePhotos.storageKey }).from(resumePhotos).where(eq(resumePhotos.userId, userId));
+    await tx.delete(resumes).where(eq(resumes.userId, userId));
+    await tx.delete(resumePhotos).where(eq(resumePhotos.userId, userId));
+    await tx.delete(credentialAccounts).where(eq(credentialAccounts.userId, userId));
+    await tx.delete(users).where(eq(users.id, userId));
+    return photos.map((photo) => photo.storageKey);
+  });
+}
+
 export async function duplicateResumeForUser(userId: number, id: number) {
   const original = await getResumeForUser(userId, id);
   if (!original) return undefined;
